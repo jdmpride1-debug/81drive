@@ -1,0 +1,407 @@
+<title>+81DRIVE 表示速度診断</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Saira+Condensed:wght@500;600;700&display=swap">
+<style>
+:root{
+  --ground:#EDEFF2; --surface:#FFFFFF; --surface-2:#F5F7F9;
+  --ink:#14171C; --ink-2:#3C444F; --muted:#697384;
+  --rule:#D3D9E0; --rule-strong:#B6BFCA;
+  --accent:#C1121F; --accent-soft:#F6DEE0;
+  --good:#0E7C5A; --good-soft:#D8EFE6;
+  --warn:#9C6200; --warn-soft:#F7E8CC;
+  --track:#DFE4EA;
+  --bar-a:#2F3A48; --bar-b:#7C8798;
+  --shadow:0 1px 2px rgba(20,23,28,.06),0 8px 24px -12px rgba(20,23,28,.18);
+}
+:root:not([data-theme="light"]){}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#101317; --surface:#181C22; --surface-2:#1F242B;
+    --ink:#E7EAEE; --ink-2:#BFC7D1; --muted:#8B95A3;
+    --rule:#2B323A; --rule-strong:#3D4650;
+    --accent:#FF5A67; --accent-soft:#3A1C20;
+    --good:#3FBF92; --good-soft:#12312A;
+    --warn:#E0A64A; --warn-soft:#33260F;
+    --track:#272E36;
+    --bar-a:#95A2B3; --bar-b:#5A6674;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#101317; --surface:#181C22; --surface-2:#1F242B;
+  --ink:#E7EAEE; --ink-2:#BFC7D1; --muted:#8B95A3;
+  --rule:#2B323A; --rule-strong:#3D4650;
+  --accent:#FF5A67; --accent-soft:#3A1C20;
+  --good:#3FBF92; --good-soft:#12312A;
+  --warn:#E0A64A; --warn-soft:#33260F;
+  --track:#272E36;
+  --bar-a:#95A2B3; --bar-b:#5A6674;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:"IBM Plex Sans JP",system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+  font-size:15px; line-height:1.75;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:960px;margin:0 auto;padding-inline:20px;padding-block:0 72px}
+.mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+.cond{font-family:"Saira Condensed","IBM Plex Sans JP",sans-serif}
+h1,h2,h3{text-wrap:balance;line-height:1.3;margin:0}
+
+/* ---- masthead ---- */
+.mast{border-bottom:2px solid var(--ink);padding-block:36px 18px;margin-bottom:32px}
+.kicker{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.mast h1{font-size:clamp(30px,6vw,46px);font-weight:700;letter-spacing:-.02em;margin-top:10px}
+.mast .sub{color:var(--muted);margin-top:10px;max-width:62ch}
+.provenance{
+  display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:20px;
+  font-size:12px;color:var(--muted)
+}
+.provenance b{color:var(--ink-2);font-weight:500}
+
+section{margin-top:52px}
+.sec-head{display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--rule);padding-bottom:10px;margin-bottom:24px;flex-wrap:wrap}
+.sec-num{font-size:11px;letter-spacing:.14em;color:var(--accent);font-weight:600}
+.sec-head h2{font-size:21px;font-weight:700;letter-spacing:-.01em}
+.sec-head .note{margin-left:auto;font-size:12px;color:var(--muted)}
+p{margin:0 0 14px;max-width:70ch;color:var(--ink-2)}
+strong{color:var(--ink);font-weight:600}
+
+/* ---- verdict ---- */
+.verdict{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.vcard{background:var(--surface);border:1px solid var(--rule);border-radius:3px;padding:20px;box-shadow:var(--shadow)}
+.vcard.crit{border-left:3px solid var(--accent)}
+.vcard.ok{border-left:3px solid var(--good)}
+.vcard .lab{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.vcard .big{font-family:"Saira Condensed",sans-serif;font-size:44px;font-weight:700;line-height:1;margin-top:8px;font-variant-numeric:tabular-nums}
+.vcard.crit .big{color:var(--accent)}
+.vcard.ok .big{color:var(--good)}
+.vcard .cap{font-size:13px;color:var(--muted);margin-top:8px}
+
+/* ---- instrument panel ---- */
+.panels{display:grid;grid-template-columns:1fr;gap:22px}
+.panel{background:var(--surface);border:1px solid var(--rule);border-radius:3px;box-shadow:var(--shadow);overflow:hidden}
+.panel-head{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--rule);background:var(--surface-2);flex-wrap:wrap}
+.panel-head h3{font-size:15px;font-weight:700}
+.panel-head .cond-cond{font-size:12px;color:var(--muted)}
+.score{margin-left:auto;font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:13px;padding:3px 10px;border-radius:2px;letter-spacing:.04em}
+.score.g{background:var(--good-soft);color:var(--good)}
+.panel-body{padding:18px 20px 22px}
+
+.track-row{display:grid;grid-template-columns:74px 1fr 64px;align-items:center;gap:12px;margin-bottom:9px}
+.track-row .name{font-family:"Saira Condensed",sans-serif;font-weight:600;font-size:14px;letter-spacing:.04em;color:var(--ink-2)}
+.track{position:relative;height:16px;background:var(--track);border-radius:2px;overflow:hidden}
+.fill{position:absolute;inset-block:0;left:0;border-radius:2px;background:linear-gradient(90deg,var(--bar-a),var(--bar-b))}
+.fill.red{background:linear-gradient(90deg,var(--accent),var(--accent))}
+.val{font-family:"IBM Plex Mono",monospace;font-size:13px;font-weight:500;text-align:right;font-variant-numeric:tabular-nums}
+.val.red{color:var(--accent);font-weight:600}
+.goal{position:relative;height:26px;margin:6px 0 2px;grid-column:2}
+.goalline{position:absolute;top:0;bottom:12px;width:2px;background:var(--accent)}
+.goalline span{position:absolute;top:-1px;left:6px;font-size:10px;color:var(--accent);white-space:nowrap;font-weight:600;letter-spacing:.04em}
+.axis{display:grid;grid-template-columns:74px 1fr 64px;gap:12px;margin-top:2px}
+.ticks{display:flex;justify-content:space-between;font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--muted);border-top:1px solid var(--rule);padding-top:4px}
+
+/* ---- weight ---- */
+.weight{display:flex;height:34px;border-radius:3px;overflow:hidden;border:1px solid var(--rule);margin:6px 0 10px}
+.weight div{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;overflow:hidden;white-space:nowrap}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:baseline}
+
+/* ---- evidence ---- */
+pre.ev{
+  background:var(--surface-2);border:1px solid var(--rule);border-left:3px solid var(--accent);
+  border-radius:3px;padding:14px 16px;overflow-x:auto;
+  font-family:"IBM Plex Mono",monospace;font-size:12.5px;line-height:1.7;color:var(--ink-2);margin:0 0 16px
+}
+pre.ev b{color:var(--accent);font-weight:600}
+
+/* ---- actions ---- */
+.act{background:var(--surface);border:1px solid var(--rule);border-radius:3px;margin-bottom:14px;box-shadow:var(--shadow);overflow:hidden}
+.act-head{display:grid;grid-template-columns:34px 1fr auto;gap:14px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--rule)}
+.rank{font-family:"Saira Condensed",sans-serif;font-size:22px;font-weight:700;color:var(--accent);text-align:center;font-variant-numeric:tabular-nums;line-height:1}
+.act-head h3{font-size:15.5px;font-weight:700}
+.gain{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;padding:4px 9px;border-radius:2px;background:var(--good-soft);color:var(--good);white-space:nowrap}
+.gain.b{background:var(--warn-soft);color:var(--warn)}
+.act-body{padding:16px 18px 18px}
+.act-body p:last-child{margin-bottom:0}
+.act-body ul{margin:0 0 14px;padding-left:20px;color:var(--ink-2)}
+.act-body li{margin-bottom:7px}
+.act-body li:last-child{margin-bottom:0}
+.effort{display:inline-block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:var(--muted);border:1px solid var(--rule-strong);border-radius:2px;padding:2px 8px;margin-right:8px}
+code{font-family:"IBM Plex Mono",monospace;font-size:.9em;background:var(--surface-2);border:1px solid var(--rule);border-radius:2px;padding:1px 5px;color:var(--ink)}
+
+/* ---- roadmap ---- */
+.road{width:100%;border-collapse:collapse;font-size:14px}
+.road th,.road td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--rule)}
+.road th{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;border-bottom:1px solid var(--rule-strong)}
+.road td.n{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;text-align:right}
+.road tr:last-child td{border-bottom:none}
+.road .now{color:var(--accent);font-weight:600}
+.road .p2{color:var(--good);font-weight:600}
+.tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--rule);border-radius:3px;box-shadow:var(--shadow)}
+
+.callout{background:var(--accent-soft);border:1px solid var(--accent);border-radius:3px;padding:16px 18px;margin:20px 0}
+.callout p{color:var(--ink);margin:0}
+.callout .lab{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:6px}
+
+footer{margin-top:64px;padding-top:20px;border-top:1px solid var(--rule);font-size:12px;color:var(--muted)}
+footer a{color:var(--accent)}
+
+@media (max-width:640px){
+  .verdict{grid-template-columns:1fr}
+  .track-row,.axis{grid-template-columns:58px 1fr 56px;gap:8px}
+  .act-head{grid-template-columns:26px 1fr;row-gap:8px}
+  .gain{grid-column:2}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+
+<header class="mast">
+  <div class="kicker">Performance Audit · 米国からの実測</div>
+  <h1>+81DRIVE 表示速度診断</h1>
+  <p class="sub">81drive.com を米国内のサーバーから Lighthouse で実測し、表示を1秒台、最終的に1秒未満にするための改善策を優先度順にまとめました。</p>
+  <div class="provenance">
+    <span>計測日 <b>2026-09-11</b></span>
+    <span>計測地点 <b>Portland (PDX) / Chicago (ORD)</b></span>
+    <span>ツール <b>Lighthouse 12</b></span>
+    <span>試行 <b>各3回の中央値</b></span>
+  </div>
+</header>
+
+<section>
+  <div class="sec-head">
+    <span class="sec-num">01</span>
+    <h2>結論</h2>
+  </div>
+  <div class="verdict">
+    <div class="vcard crit">
+      <div class="lab">最大のボトルネック</div>
+      <div class="big">570–900<span style="font-size:20px">ms</span></div>
+      <div class="cap">サーバー応答時間 (TTFB)。CDN が HTML を一切キャッシュしておらず、米国からの全アクセスが日本のサーバーまで往復しています。</div>
+    </div>
+    <div class="vcard crit">
+      <div class="lab">2番目のボトルネック</div>
+      <div class="big">2.0<span style="font-size:20px">MB</span></div>
+      <div class="cap">写真バナー4枚が PNG のまま。1枚あたり 537–633KB で、ページ全体の約8割を占めています。</div>
+    </div>
+  </div>
+  <div class="callout">
+    <div class="lab">重要な前提</div>
+    <p><strong>デスクトップは既に目標を達成しています（LCP 0.79秒）。</strong>「1秒台」「1秒未満」が課題になるのはモバイル回線（LCP 2.42秒）です。以降の改善策はモバイルを基準に優先順位を付けています。</p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="sec-num">02</span>
+    <h2>実測値</h2>
+    <span class="note">横軸は 0–7秒 共通スケール／赤線が目標の1.0秒</span>
+  </div>
+
+  <div class="panels">
+    <div class="panel">
+      <div class="panel-head">
+        <h3>モバイル</h3>
+        <span class="cond-cond">低速4G · CPU 4倍遅延</span>
+        <span class="score g">96 / 100</span>
+      </div>
+      <div class="panel-body">
+        <div class="axis"><span></span><div class="goal"><div class="goalline" style="left:14.3%"><span>目標 1.0s</span></div></div><span></span></div>
+        <div class="track-row"><span class="name">TTFB</span><div class="track"><div class="fill" style="width:11.7%"></div></div><span class="val">0.82s</span></div>
+        <div class="track-row"><span class="name">FCP</span><div class="track"><div class="fill" style="width:29.6%"></div></div><span class="val">2.07s</span></div>
+        <div class="track-row"><span class="name">LCP</span><div class="track"><div class="fill red" style="width:34.6%"></div></div><span class="val red">2.42s</span></div>
+        <div class="track-row"><span class="name">SI</span><div class="track"><div class="fill" style="width:34.9%"></div></div><span class="val">2.44s</span></div>
+        <div class="track-row"><span class="name">TTI</span><div class="track"><div class="fill red" style="width:93.9%"></div></div><span class="val red">6.57s</span></div>
+        <div class="axis"><span></span><div class="ticks"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7s</span></div><span></span></div>
+        <p style="margin-top:16px;font-size:13px">TBT 0.08秒 ／ CLS 0.000 ／ 32リクエスト ／ 1,249KB</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h3>デスクトップ</h3>
+        <span class="cond-cond">スロットリングなし</span>
+        <span class="score g">99 / 100</span>
+      </div>
+      <div class="panel-body">
+        <div class="axis"><span></span><div class="goal"><div class="goalline" style="left:14.3%"><span>目標 1.0s</span></div></div><span></span></div>
+        <div class="track-row"><span class="name">TTFB</span><div class="track"><div class="fill red" style="width:12.1%"></div></div><span class="val red">0.85s</span></div>
+        <div class="track-row"><span class="name">FCP</span><div class="track"><div class="fill" style="width:8.1%"></div></div><span class="val">0.57s</span></div>
+        <div class="track-row"><span class="name">LCP</span><div class="track"><div class="fill" style="width:11.3%"></div></div><span class="val">0.79s</span></div>
+        <div class="track-row"><span class="name">SI</span><div class="track"><div class="fill" style="width:15.9%"></div></div><span class="val">1.11s</span></div>
+        <div class="track-row"><span class="name">TTI</span><div class="track"><div class="fill" style="width:11.3%"></div></div><span class="val">0.79s</span></div>
+        <div class="axis"><span></span><div class="ticks"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7s</span></div><span></span></div>
+        <p style="margin-top:16px;font-size:13px">TBT 0.00秒 ／ CLS 0.000 ／ 34リクエスト ／ 2,282KB</p>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="font-size:14px;margin-top:28px;margin-bottom:4px">ページ容量の内訳（デスクトップ 2,282KB）</h3>
+  <div class="weight">
+    <div style="width:80.4%;background:#C1121F">画像 1,835KB — 80%</div>
+    <div style="width:15.5%;background:#2F3A48">JS 354KB</div>
+    <div style="width:2.4%;background:#7C8798"></div>
+    <div style="width:1.7%;background:#B6BFCA"></div>
+  </div>
+  <div class="legend">
+    <span><i style="background:#C1121F"></i>画像 1,835KB</span>
+    <span><i style="background:#2F3A48"></i>JavaScript 354KB</span>
+    <span><i style="background:#7C8798"></i>CSS 54KB</span>
+    <span><i style="background:#B6BFCA"></i>HTML 26KB / フォント 9KB</span>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="sec-num">03</span>
+    <h2>根本原因</h2>
+  </div>
+  <p>レスポンスヘッダーに原因がそのまま出ています。実際に取得した値です。</p>
+  <pre class="ev">server: cloudflare
+cf-edge-cache: cache,platform=wordpress
+<b>vary: User-Agent</b>            ← エッジキャッシュを事実上無効化
+<b>cf-cache-status: DYNAMIC</b>    ← HTML がキャッシュされていない
+cf-ray: a39371aeef9cc36d-<b>PDX</b>   ← 米国オレゴンのエッジに着弾</pre>
+  <p><code>cf-cache-status: DYNAMIC</code> は、Cloudflare のエッジに到達したリクエストが<strong>毎回そのまま日本のオリジンサーバーまで転送されている</strong>ことを意味します。米国からだと太平洋を往復するため、これだけで数百ミリ秒が確定で乗ります。</p>
+  <p>さらに <code>vary: User-Agent</code> が付いているため、仮にキャッシュを有効化しても User-Agent 文字列ごとに別エントリとして保存され、ヒット率はほぼゼロになります。<strong>この2つを直すことが最優先です。</strong></p>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="sec-num">04</span>
+    <h2>改善策（効果の大きい順）</h2>
+    <span class="note">1〜4 が Phase 1、5〜9 が Phase 2</span>
+  </div>
+
+  <div class="act">
+    <div class="act-head"><span class="rank">1</span><h3>Cloudflare で HTML をエッジキャッシュする</h3><span class="gain">−0.5〜0.8秒</span></div>
+    <div class="act-body">
+      <p><span class="effort">設定のみ</span>最も効果が大きく、コード変更が不要な施策です。</p>
+      <ul>
+        <li><strong>Cloudflare APO for WordPress</strong>（月額5ドル）を有効化する。WordPress 向けに HTML を全世界のエッジに配信する専用機能で、まさにこの問題のための仕組みです。<code>cf-edge-cache</code> ヘッダーが出ているので Cloudflare の WP プラグインは既に入っており、APO を有効にするだけの可能性が高いです。</li>
+        <li>APO を使わない場合は、Cache Rule で「Cache Eligibility: Eligible for cache」＋ Edge TTL を設定し、<code>wp-admin</code> とログインクッキー保持時はバイパスする。</li>
+        <li><strong><code>vary: User-Agent</code> を外す。</strong>これが残っているとキャッシュはほぼ効きません。モバイル判定プラグインかテーマの設定が出力元です。</li>
+      </ul>
+      <p>想定効果：TTFB 570–900ms → <strong>30–80ms</strong>。全ページ・全ユーザーに効きます。</p>
+    </div>
+  </div>
+
+  <div class="act">
+    <div class="act-head"><span class="rank">2</span><h3>PNG バナー4枚を WebP / AVIF に変換する</h3><span class="gain">−1.6〜2.1MB</span></div>
+    <div class="act-body">
+      <p><span class="effort">設定のみ</span>写真がPNGで保存されています。PNG は透過やフラットな図版用で、写真には不向きです。</p>
+      <pre class="ev">633KB  DAIKOKU-TOUR バナー-1024x576.png
+560KB  JDM-TOUR バナー-3-1024x576.png
+545KB  image-1-1024x576.png
+537KB  image-1024x576.png
+─────
+2,275KB → WebP なら合計 250KB 程度</pre>
+      <ul>
+        <li>既に <strong>EWWW Image Optimizer</strong> が入っているので、WebP 変換と配信（Easy IO もしくは WebP リライト）を有効にする。</li>
+        <li>または Cloudflare <strong>Polish + WebP</strong>（Pro プラン）を使えば、画像を差し替えずに自動変換されます。</li>
+      </ul>
+      <p>モバイルの体感に最も効きます。低速回線ではこの2MBが数秒の差になります。</p>
+    </div>
+  </div>
+
+  <div class="act">
+    <div class="act-head"><span class="rank">3</span><h3>メインビジュアルを最優先で読み込ませる</h3><span class="gain">−0.3〜0.9秒</span></div>
+    <div class="act-body">
+      <p><span class="effort">テーマ編集</span>LCP（最大要素の描画）の対象は、トップのスライダー画像 <code>メインビジュアル用.jpeg</code> です。モバイルの初回計測では <strong>3,400ms</strong> かかっていました。</p>
+      <pre class="ev">div.p-mainVisual__inner &gt; div.p-mainVisual__slide
+  &gt; picture.p-mainVisual__imgLayer &gt; img.p-mainVisual__img</pre>
+      <ul>
+        <li>この <code>&lt;img&gt;</code> に <code>fetchpriority="high"</code> を付ける。</li>
+        <li><strong>遅延読み込みの対象から外す。</strong>ファーストビューの画像を lazy-load すると LCP は必ず悪化します。</li>
+        <li><code>&lt;head&gt;</code> に <code>&lt;link rel="preload" as="image" imagesrcset="…"&gt;</code> を追加する。</li>
+        <li>lazysizes が <strong>EWWW と SWELL の2本</strong>読み込まれています。どちらか一方で十分です。</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="act">
+    <div class="act-head"><span class="rank">4</span><h3>Cloudflare Rocket Loader を無効にする</h3><span class="gain">TTI 改善</span></div>
+    <div class="act-body">
+      <p><span class="effort">設定のみ</span>全スクリプトが <code>type="b5740862f4b864a7b2f4bfff-text/javascript"</code> に書き換えられており、Rocket Loader が有効になっています。</p>
+      <p>Rocket Loader は JS の実行を後ろへずらす機能ですが、<strong>このサイトでは TBT が既に 0.00〜0.08秒</strong>で、遅延させるべき負荷が存在しません。一方でメインビジュアルのスライダー制御（<code>set_mv.min.js</code>）まで遅延させるため、<strong>LCP と TTI 6.57秒 を悪化させている可能性が高い</strong>です。オフにして再計測してください。</p>
+    </div>
+  </div>
+
+  <div class="act">
+    <div class="act-head"><span class="rank">5</span><h3>Google タグの重複を解消する</h3><span class="gain b">−173KB</span></div>
+    <div class="act-body">
+      <p><span class="effort">タグ設定</span>GTM と gtag が両方読み込まれています。</p>
+      <pre class="ev">173KB  googletagmanager.com/gtag/js?id=GT-TX9NK383
+115KB  googletagmanager.com/gtm.js?id=GTM-WFGD8X5Q</pre>
+      <p>計測基盤が二重です。GTM に一本化し、GA4 は GTM 内のタグとして設定すれば、<strong>173KB とメインスレッド処理が丸ごと減ります</strong>。サードパーティ JS はモバイルでメインスレッドを 370ms 占有しています。</p>
+    </div>
+  </div>
+
+  <div class="act">
+    <div class="act-head"><span class="rank">6</span><h3>静的ファイルのキャッシュ期間を延ばす</h3><span class="gain b">再訪問が高速化</span></div>
+    <div class="act-body">
+      <p><span class="effort">設定のみ</span>24〜26個のファイルでキャッシュ期間が短すぎると指摘されています。<code>/wp-content/*</code> に対して <code>Cache-Control: public, max-age=31536000, immutable</code> を設定してください。SWELL のアセットは <code>?ver=2.12.0</code> でバージョン管理されているため、長期キャッシュしても更新時に問題は起きません。</p>
+    </div>
+  </div>
+
+  <div class="act">
+    <div class="act-head"><span class="rank">7</span><h3>Trustindex を遅延読み込みにする</h3><span class="gain b">−24KB + 実行時間</span></div>
+    <div class="act-body">
+      <p><span class="effort">軽微</span>口コミウィジェット <code>cdn.trustindex.io/loader.js</code> はページ下部にあるため、初期表示には不要です。スクロールで表示領域に入ってから読み込むようにしてください。</p>
+    </div>
+  </div>
+
+  <div class="act">
+    <div class="act-head"><span class="rank">8</span><h3>Web フォントに font-display: swap を指定する</h3><span class="gain b">体感改善</span></div>
+    <div class="act-body">
+      <p><span class="effort">軽微</span>アイコンフォント <code>icomoon.woff2</code> の読み込み中にテキストが不可視になっています。<code>font-display: swap</code> を指定すれば、フォント取得前でも本文が表示されます。</p>
+    </div>
+  </div>
+
+  <div class="act">
+    <div class="act-head"><span class="rank">9</span><h3>未使用の CSS / JS を削減する</h3><span class="gain b">−40KB / −164KB</span></div>
+    <div class="act-body">
+      <p><span class="effort">要検証</span>SWELL の <code>blocks.css</code>(23KB) と <code>main.css</code>(22KB) が全ページで読み込まれています。SWELL の「CSSを直接読み込む／インライン化」設定やページ単位の出し分けで削減できますが、<strong>1〜4 を先に実施した後の効果測定を見てから着手</strong>してください。上位施策だけで目標に届く可能性が高いためです。</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="sec-num">05</span>
+    <h2>目標までのロードマップ</h2>
+    <span class="note">Phase 1 / 2 の数値は実測値からの推定</span>
+  </div>
+  <div class="tablewrap">
+  <table class="road">
+    <thead><tr><th>段階</th><th>実施内容</th><th class="n">モバイル LCP</th><th class="n">デスクトップ LCP</th><th class="n">ページ容量</th></tr></thead>
+    <tbody>
+      <tr><td class="now">現在</td><td>—</td><td class="n now">2.42s</td><td class="n">0.79s</td><td class="n">2,282KB</td></tr>
+      <tr><td><strong>Phase 1</strong></td><td>施策 1〜4（大半が設定変更のみ）</td><td class="n">約 1.2〜1.5s</td><td class="n">約 0.4s</td><td class="n">約 500KB</td></tr>
+      <tr><td class="p2"><strong>Phase 2</strong></td><td>施策 5〜9</td><td class="n p2">約 0.9〜1.1s</td><td class="n p2">約 0.3s</td><td class="n">約 300KB</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p style="margin-top:18px"><strong>1秒台という目標は Phase 1 だけで到達見込みです。</strong>しかも施策1・2・4は Cloudflare とプラグインの設定変更のみで、テーマのコード改修は施策3だけです。1秒未満はモバイル実測では Phase 2 まで実施してようやく射程に入る、という位置づけになります。</p>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="sec-num">06</span>
+    <h2>計測について</h2>
+  </div>
+  <p>この診断は GitHub Actions の米国リージョンのランナーから Lighthouse 12 を実行し、モバイル・デスクトップ各3回の中央値を取ったものです。計測一式はリポジトリにコミット済みで、<code>Actions → Performance audit (US)</code> からいつでも再実行できます。毎週月曜にも自動実行されるため、改善の効果をそのまま数値で追えます。</p>
+  <p><strong>注意点：</strong>TTFB は実行ごとに 570〜900ms とばらつきがあります。これはエッジキャッシュが無く、オリジンの状態に左右されるためで、ばらつき自体が施策1の必要性を裏付けています。また Lighthouse はラボ計測であり、実ユーザーの体感とは異なります。改善後は Google Search Console の Core Web Vitals（実ユーザーデータ）も併せて確認することをおすすめします。</p>
+</section>
+
+<footer>
+  <p>+81DRIVE（JDM PRIDE株式会社）／ WordPress + SWELL 2.12.0 ／ Cloudflare<br>
+  計測 2026-09-11 · Lighthouse 12 · 米国 Portland / Chicago エッジ</p>
+</footer>
+
+</div>
