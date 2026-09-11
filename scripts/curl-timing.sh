@@ -7,7 +7,7 @@ URL="${1:-https://81drive.com/}"
 FMT='dns=%{time_namelookup} tcp=%{time_connect} tls=%{time_appconnect} ttfb=%{time_starttransfer} total=%{time_total} size=%{size_download} http=%{http_code} proto=%{http_version}\n'
 
 echo "=== Response headers: $URL ==="
-curl -sSIL --max-time 30 "$URL" 2>&1 | sed 's/^/  /'
+curl -sSI --max-time 30 "$URL" 2>&1 | sed 's/^/  /'
 
 echo
 echo "=== Cold connection (new TLS handshake each time) x5 ==="
@@ -18,8 +18,10 @@ done
 
 echo
 echo "=== Warm connection (connection reuse, 5 requests on one connection) ==="
-curl -sS -o /dev/null --max-time 60 -w "$FMT" \
-  "$URL" "$URL" "$URL" "$URL" "$URL" || echo "(failed)"
+# -o must be repeated per URL, otherwise only the first body is discarded
+curl -sS --max-time 60 -w "$FMT" \
+  -o /dev/null "$URL" -o /dev/null "$URL" -o /dev/null "$URL" \
+  -o /dev/null "$URL" -o /dev/null "$URL" || echo "(failed)"
 
 echo
 echo "=== Compression check ==="

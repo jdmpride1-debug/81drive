@@ -46,9 +46,6 @@ jobs:
         run: |
           for i in 1 2 3; do
             lighthouse "$TARGET_URL" \
-              --preset=desktop=false \
-              --form-factor=mobile \
-              --screenEmulation.mobile \
               --only-categories=performance \
               --output=json --output=html \
               --output-path="./lh-mobile-$i" \
