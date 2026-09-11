@@ -1,0 +1,89 @@
+name: Performance audit (US)
+
+# Measures https://81drive.com/ from a GitHub-hosted runner (US region),
+# so the numbers approximate what a visitor in the United States experiences.
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: URL to audit
+        required: false
+        default: https://81drive.com/
+  push:
+    branches:
+      - 'claude/**'
+  schedule:
+    # Weekly regression check, Mondays 09:00 UTC
+    - cron: '0 9 * * 1'
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Report runner location
+        run: |
+          echo "Runner public IP / geo (confirms the US vantage point):"
+          curl -s --max-time 15 https://ipinfo.io/json || echo "(geo lookup unavailable)"
+
+      - name: Install Lighthouse
+        run: npm install -g lighthouse@12
+
+      - name: Network timing breakdown
+        env:
+          TARGET_URL: ${{ github.event.inputs.url || 'https://81drive.com/' }}
+        run: bash scripts/curl-timing.sh "$TARGET_URL"
+
+      - name: Lighthouse - mobile
+        env:
+          TARGET_URL: ${{ github.event.inputs.url || 'https://81drive.com/' }}
+        run: |
+          for i in 1 2 3; do
+            lighthouse "$TARGET_URL" \
+              --preset=desktop=false \
+              --form-factor=mobile \
+              --screenEmulation.mobile \
+              --only-categories=performance \
+              --output=json --output=html \
+              --output-path="./lh-mobile-$i" \
+              --chrome-flags="--headless=new --no-sandbox --disable-gpu" \
+              --quiet || true
+          done
+
+      - name: Lighthouse - desktop
+        env:
+          TARGET_URL: ${{ github.event.inputs.url || 'https://81drive.com/' }}
+        run: |
+          for i in 1 2 3; do
+            lighthouse "$TARGET_URL" \
+              --preset=desktop \
+              --only-categories=performance \
+              --output=json --output=html \
+              --output-path="./lh-desktop-$i" \
+              --chrome-flags="--headless=new --no-sandbox --disable-gpu" \
+              --quiet || true
+          done
+
+      - name: Summarize results
+        run: node scripts/summarize-lighthouse.js
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: |
+            lh-*.report.html
+            lh-*.report.json
+            perf-summary.md
+          if-no-files-found: warn
+
+      - name: Publish summary
+        if: always()
+        run: cat perf-summary.md >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true

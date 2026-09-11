@@ -1,0 +1,166 @@
+#!/usr/bin/env node
+/**
+ * Reads the lh-*.report.json files produced by the audit workflow and writes a
+ * human-readable perf-summary.md (also echoed to stdout / the job summary).
+ *
+ * Reports the MEDIAN of the runs for each form factor, which is what Lighthouse
+ * itself recommends when comparing numbers across time.
+ */
+const fs = require('fs');
+const path = require('path');
+
+const ms = (v) => (v == null ? 'n/a' : `${(v / 1000).toFixed(2)}s`);
+const kb = (v) => (v == null ? 'n/a' : `${(v / 1024).toFixed(0)} KB`);
+const median = (arr) => {
+  const a = arr.filter((n) => typeof n === 'number' && !Number.isNaN(n)).sort((x, y) => x - y);
+  if (!a.length) return null;
+  const mid = Math.floor(a.length / 2);
+  return a.length % 2 ? a[mid] : (a[mid - 1] + a[mid]) / 2;
+};
+
+const METRICS = [
+  ['first-contentful-paint', 'FCP  (First Contentful Paint)'],
+  ['largest-contentful-paint', 'LCP  (Largest Contentful Paint)'],
+  ['speed-index', 'SI   (Speed Index)'],
+  ['total-blocking-time', 'TBT  (Total Blocking Time)'],
+  ['interactive', 'TTI  (Time to Interactive)'],
+  ['server-response-time', 'TTFB (Server Response Time)'],
+];
+
+function load(prefix) {
+  return fs
+    .readdirSync('.')
+    .filter((f) => f.startsWith(prefix) && f.endsWith('.report.json'))
+    .map((f) => {
+      try {
+        return JSON.parse(fs.readFileSync(f, 'utf8'));
+      } catch {
+        return null;
+      }
+    })
+    .filter(Boolean);
+}
+
+function section(label, reports) {
+  const out = [];
+  out.push(`\n## ${label}\n`);
+  if (!reports.length) {
+    out.push('_No successful runs._\n');
+    return out.join('\n');
+  }
+
+  const scores = reports.map((r) => r?.categories?.performance?.score).filter((s) => s != null);
+  const score = median(scores);
+  out.push(`**Performance score (median of ${reports.length} runs): ${score == null ? 'n/a' : Math.round(score * 100)} / 100**\n`);
+
+  out.push('| Metric | Median | Runs |');
+  out.push('|---|---|---|');
+  for (const [id, label] of METRICS) {
+    const vals = reports.map((r) => r?.audits?.[id]?.numericValue);
+    const m = median(vals);
+    const all = vals.map((v) => (v == null ? '-' : ms(v))).join(', ');
+    out.push(`| ${label} | **${ms(m)}** | ${all} |`);
+  }
+  const cls = median(reports.map((r) => r?.audits?.['cumulative-layout-shift']?.numericValue));
+  out.push(`| CLS  (Cumulative Layout Shift) | **${cls == null ? 'n/a' : cls.toFixed(3)}** | |`);
+  out.push('');
+
+  // Page weight breakdown
+  const rs = reports[0]?.audits?.['resource-summary']?.details?.items || [];
+  if (rs.length) {
+    out.push('### Page weight');
+    out.push('| Resource type | Requests | Transfer size |');
+    out.push('|---|---|---|');
+    for (const it of rs) {
+      out.push(`| ${it.label || it.resourceType} | ${it.requestCount} | ${kb(it.transferSize)} |`);
+    }
+    out.push('');
+  }
+
+  // What Lighthouse thinks would help, ranked by estimated savings
+  const opps = [];
+  for (const [id, audit] of Object.entries(reports[0]?.audits || {})) {
+    const savings = audit?.details?.overallSavingsMs ?? audit?.numericValue;
+    if (audit?.details?.type === 'opportunity' && savings > 0) {
+      opps.push({ id, title: audit.title, savings, bytes: audit?.details?.overallSavingsBytes });
+    }
+  }
+  opps.sort((a, b) => b.savings - a.savings);
+  if (opps.length) {
+    out.push('### Opportunities (ranked by estimated time saved)');
+    out.push('| Opportunity | Est. saving | Bytes saved |');
+    out.push('|---|---|---|');
+    for (const o of opps.slice(0, 15)) {
+      out.push(`| ${o.title} | ${ms(o.savings)} | ${o.bytes ? kb(o.bytes) : '-'} |`);
+    }
+    out.push('');
+  }
+
+  // Failing diagnostics worth acting on
+  const diagIds = [
+    'render-blocking-resources', 'uses-responsive-images', 'offscreen-images',
+    'unminified-css', 'unminified-javascript', 'unused-css-rules', 'unused-javascript',
+    'uses-optimized-images', 'modern-image-formats', 'uses-text-compression',
+    'uses-rel-preconnect', 'server-response-time', 'redirects', 'uses-long-cache-ttl',
+    'total-byte-weight', 'dom-size', 'bootup-time', 'mainthread-work-breakdown',
+    'font-display', 'third-party-summary', 'largest-contentful-paint-element',
+    'prioritize-lcp-image', 'legacy-javascript',
+  ];
+  const failing = diagIds
+    .map((id) => reports[0]?.audits?.[id])
+    .filter((a) => a && a.score !== null && a.score < 0.9);
+  if (failing.length) {
+    out.push('### Failing diagnostics');
+    for (const a of failing) {
+      out.push(`- **${a.title}** — ${a.displayValue || ''}`);
+    }
+    out.push('');
+  }
+
+  // The single heaviest requests are usually where the wins are
+  const reqs = reports[0]?.audits?.['network-requests']?.details?.items || [];
+  const heavy = [...reqs]
+    .filter((r) => r.transferSize)
+    .sort((a, b) => b.transferSize - a.transferSize)
+    .slice(0, 20);
+  if (heavy.length) {
+    out.push('### 20 heaviest requests');
+    out.push('| Size | Type | URL |');
+    out.push('|---|---|---|');
+    for (const r of heavy) {
+      const url = String(r.url || '').slice(0, 120);
+      out.push(`| ${kb(r.transferSize)} | ${r.resourceType || '-'} | \`${url}\` |`);
+    }
+    out.push('');
+  }
+
+  // LCP element: knowing what it is decides the whole optimization strategy
+  const lcpEl = reports[0]?.audits?.['largest-contentful-paint-element'];
+  const lcpNode = lcpEl?.details?.items?.[0]?.items?.[0]?.node;
+  if (lcpNode) {
+    out.push('### LCP element');
+    out.push('```');
+    out.push(`selector: ${lcpNode.selector || 'n/a'}`);
+    out.push(`snippet : ${lcpNode.snippet || 'n/a'}`);
+    out.push('```');
+    out.push('');
+  }
+
+  out.push(`Total requests: ${reqs.length}`);
+  const totalBytes = reqs.reduce((s, r) => s + (r.transferSize || 0), 0);
+  out.push(`Total transferred: ${kb(totalBytes)}`);
+  out.push('');
+
+  return out.join('\n');
+}
+
+const mobile = load('lh-mobile');
+const desktop = load('lh-desktop');
+const url = mobile[0]?.finalDisplayedUrl || desktop[0]?.finalDisplayedUrl || 'https://81drive.com/';
+
+let md = `# Performance audit — ${url}\n\nMeasured ${new Date().toISOString()} from a GitHub-hosted runner (US region).\n`;
+md += section('Mobile (throttled: slow 4G, 4x CPU slowdown)', mobile);
+md += section('Desktop', desktop);
+
+fs.writeFileSync('perf-summary.md', md);
+console.log(md);
