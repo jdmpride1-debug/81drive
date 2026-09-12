@@ -237,12 +237,12 @@ ol.howto strong{color:var(--ink)}
 <div class="wrap">
 
 <header class="mast">
-  <div class="kicker">Performance Audit · 3回目の計測</div>
+  <div class="kicker">Performance Audit · 4回目の計測</div>
   <h1>+81DRIVE 表示速度診断</h1>
-  <p class="sub">2026-09-12 05:03 に米国シカゴから再計測しました。結論から言うと、<strong>速度に効く3つの課題はまだ手つかず</strong>です。この先は「何を・どこで・どうクリックするか」まで分解して書いています。</p>
+  <p class="sub">2026-09-12 05:48 に米国フェニックスから再計測し、外部通信を全件調べました。<strong>タグの件は当初の見立てより小さく、いま効くのは画像です。</strong>手順は「何を・どこで・どうクリックするか」まで分解しています。</p>
   <div class="provenance">
-    <span>今回 <b>09-12 05:03</b></span>
-    <span>計測地点 <b>Chicago, Illinois (ORD)</b></span>
+    <span>今回 <b>09-12 05:48</b></span>
+    <span>計測地点 <b>Phoenix, Arizona (LAX edge)</b></span>
     <span>ツール <b>Lighthouse 12</b>／各3回の中央値</span>
   </div>
 </header>
@@ -254,7 +254,7 @@ ol.howto strong{color:var(--ink)}
   </div>
   <div class="callout">
     <div class="lab">ひとことで</div>
-    <p>キャッシュ（施策1）は引き続き効いていて、サーバー応答は <strong>0.02秒</strong> のままです。ただし<strong>モバイルの表示速度は 2.42 → 2.50 → 2.54秒 とわずかに悪化方向</strong>で、実質は横ばいです。理由ははっきりしていて、<strong>重いもの（Googleタグ3本と画像2MB）が前回からひとつも減っていない</strong>からです。</p>
+    <p><strong>前回お伝えした「タグ3本で1.67秒」は、今回の計測で0.28秒まで下がりました。</strong>3本目は常時読み込まれるものではなかったためで、この点はChatGPT側の指摘のほうが正確でした。訂正します。結果として<strong>残る課題はほぼ画像1点に絞られました</strong>。デスクトップのページ容量2,823KBのうち2,380KB（84%）が画像です。</p>
   </div>
 
   <p>ヘッダーを比べると、今回検出できた変更は <code>vary: accept-encoding</code> が増えたことだけでした。これは圧縮の扱いとしては正しい設定ですが、<strong>表示速度には影響しません</strong>。それ以外に速度へ効く変更は、計測結果からは確認できませんでした。</p>
@@ -268,24 +268,24 @@ x-nginx-cache: EXPIRED         今回はちょうど期限切れの瞬間に当�
   <h3 style="font-size:14px;margin:26px 0 8px">3回の推移</h3>
   <div class="tablewrap" style="margin-bottom:20px">
   <table class="trend">
-    <thead><tr><th>モバイル</th><th class="n">09-11</th><th class="n">09-12 04:21</th><th class="n">09-12 05:03</th></tr></thead>
+    <thead><tr><th>モバイル</th><th class="n">09-11</th><th class="n">09-12 05:03</th><th class="n">09-12 05:48</th></tr></thead>
     <tbody>
-      <tr><td>スコア</td><td class="n">96</td><td class="n">95</td><td class="n cur">94</td></tr>
-      <tr><td>LCP（表示完了）</td><td class="n">2.42s</td><td class="n">2.50s</td><td class="n cur">2.54s</td></tr>
-      <tr><td>TTFB（サーバー応答）</td><td class="n">0.82s</td><td class="n">0.02s</td><td class="n cur big-ok">0.02s</td></tr>
-      <tr><td>ページ容量</td><td class="n">1,249KB</td><td class="n">1,180KB</td><td class="n cur">1,417KB</td></tr>
-      <tr><td>JavaScript</td><td class="n">354KB</td><td class="n">522KB</td><td class="n cur flat">522KB</td></tr>
+      <tr><td>スコア</td><td class="n">96</td><td class="n">94</td><td class="n cur">94</td></tr>
+      <tr><td>LCP（表示完了）</td><td class="n">2.42s</td><td class="n">2.54s</td><td class="n cur">2.72s</td></tr>
+      <tr><td>TTFB（サーバー応答）</td><td class="n">0.82s</td><td class="n">0.02s</td><td class="n cur big-ok">0.03s</td></tr>
+      <tr><td>ページ容量</td><td class="n">1,249KB</td><td class="n">1,417KB</td><td class="n cur">1,245KB</td></tr>
+      <tr><td>JavaScript</td><td class="n">354KB</td><td class="n">522KB</td><td class="n cur big-ok">350KB</td></tr>
     </tbody>
   </table>
   </div>
   <div class="tablewrap">
   <table class="trend">
-    <thead><tr><th>デスクトップ</th><th class="n">09-11</th><th class="n">09-12 04:21</th><th class="n">09-12 05:03</th></tr></thead>
+    <thead><tr><th>デスクトップ</th><th class="n">09-11</th><th class="n">09-12 05:03</th><th class="n">09-12 05:48</th></tr></thead>
     <tbody>
-      <tr><td>スコア</td><td class="n">99</td><td class="n">100</td><td class="n cur">99</td></tr>
-      <tr><td>LCP（表示完了）</td><td class="n">0.79s</td><td class="n">0.73s</td><td class="n cur big-ok">0.76s</td></tr>
-      <tr><td>TTFB（サーバー応答）</td><td class="n">0.85s</td><td class="n">0.02s</td><td class="n cur big-ok">0.02s</td></tr>
-      <tr><td>ページ容量</td><td class="n">2,282KB</td><td class="n">2,995KB</td><td class="n cur flat">2,995KB</td></tr>
+      <tr><td>スコア</td><td class="n">99</td><td class="n">99</td><td class="n cur">99</td></tr>
+      <tr><td>LCP（表示完了）</td><td class="n">0.79s</td><td class="n">0.76s</td><td class="n cur big-ok">0.81s</td></tr>
+      <tr><td>TTFB（サーバー応答）</td><td class="n">0.85s</td><td class="n">0.02s</td><td class="n cur big-ok">0.03s</td></tr>
+      <tr><td>ページ容量</td><td class="n">2,282KB</td><td class="n">2,995KB</td><td class="n cur">2,823KB</td></tr>
     </tbody>
   </table>
   </div>
@@ -310,52 +310,29 @@ x-nginx-cache: EXPIRED         今回はちょうど期限切れの瞬間に当�
   <div class="sec-head">
     <span class="sec-num">03</span>
     <h2>やること（この順番で）</h2>
-    <span class="note">上から順に、効果の大きい順</span>
+    <span class="note">STEP 2 → 3 → 4 の順。STEP 1 は後回しで構いません</span>
   </div>
 
-  <div class="step">
+    <div class="step">
     <div class="step-head">
       <span class="step-no">STEP 1</span>
-      <h3>Googleタグを1本にまとめる</h3>
-      <span class="step-meta"><span class="chip gain">−1.67秒</span><span class="chip easy">コード編集なし</span></span>
+      <h3>Googleタグの整理（優先度を下げました）</h3>
+      <span class="step-meta"><span class="chip easy">−0.28秒</span><span class="chip easy">後回しでOK</span></span>
     </div>
     <div class="step-body">
-      <div class="why">
-        <b>なぜ必要か：</b>今、同じアクセス解析のプログラムが<b>3本も読み込まれています</b>。合計 459KB で、これはページ内のJavaScript 522KB のほとんどを占めています。3本あっても計測結果が3倍正確になるわけではなく、<b>単純に無駄</b>です。Lighthouse はこれを直すだけで <b>1.67秒</b> 速くなると試算しています。
-      </div>
-      <pre class="ev">172KB  gtag/js?id=GT-TX9NK383            ← どこかに直接貼られている
-172KB  gtag/js?id=GT-TX9NK383&amp;cx=c...   ← GTM が読み込んでいる
-115KB  gtm.js?id=GTM-WFGD8X5Q            ← GTM 本体
-─────
-459KB  すべて同じ GT-TX9NK383 を計測している</pre>
-
-      <p style="font-size:13.5px;margin-bottom:10px"><strong>まず「どこに貼られているか」を探します。</strong></p>
-      <ol class="howto">
-        <li>Chrome で <span class="path">https://81drive.com/</span> を開きます。</li>
-        <li>ページ上で<strong>右クリック</strong>→<strong>「ページのソースを表示」</strong>を選びます。英数字がびっしり並んだ画面が出ますが、読む必要はありません。</li>
-        <li><strong>Ctrl + F</strong>（Macは <strong>⌘ + F</strong>）を押して、検索欄に <span class="path">GT-TX9NK383</span> と入力します。</li>
-        <li>検索欄の横に<strong>ヒット件数</strong>が出ます。これが <strong>2件以上</strong>なら、GTM とは別に直接貼られたタグがあります。</li>
-      </ol>
-
-      <p style="font-size:13.5px;margin:18px 0 10px"><strong>次に、その直接貼られたタグを消します。</strong>心当たりのある場所を上から順に確認してください。</p>
-      <ol class="howto">
-        <li><strong>SWELLの設定を見る</strong> — WordPress管理画面の <span class="path">SWELL設定 → 一般</span> を開き、「Google Analytics」「Googleタグ」「head内に出力するコード」といった入力欄に <span class="path">GT-TX9NK383</span> や <span class="path">gtag</span> が入っていないか確認します。入っていたら<strong>その欄だけを空にして保存</strong>します。</li>
-        <li><strong>プラグインを見る</strong> — <span class="path">プラグイン → インストール済みプラグイン</span> で、「Site Kit by Google」「GA Google Analytics」など解析系プラグインが有効になっていないか確認します。GTMを使うなら、これらの<strong>Analytics連携をオフ</strong>にします。</li>
-        <li><strong>カスタマイザーを見る</strong> — <span class="path">外観 → カスタマイズ → 高度な設定</span>（またはCSS/HTML追加欄）に貼られていないか確認します。</li>
-        <li>消したら<strong>保存</strong>し、Cloudflare のキャッシュを消します（STEP 5 の手順）。その後、上の検索をもう一度行ってヒット件数が減ったか確認します。</li>
-      </ol>
-
       <div class="warn">
-        <div class="lab">判断に迷ったら</div>
-        <strong>GTM（タグマネージャー）を広告タグなどにも使っていますか？</strong><br>
-        ・<strong>使っている</strong> → GTM を残し、直接貼られた <code>gtag</code> を消す。（−172KB）<br>
-        ・<strong>使っていない／わからない</strong> → GTM のほうを外し、<code>gtag</code> だけ残すのが最軽量です。（−287KB）<br>
-        どちらにしても<strong>計測は止まりません</strong>。作業後に Google アナリティクスの「リアルタイム」で自分のアクセスが表示されるか確認してください。
+        <div class="lab">訂正します</div>
+        前回「3本のタグで1.67秒の改善余地」とお伝えしましたが、<strong>今回の計測では3本目が消えており、改善余地は0.28秒まで下がりました</strong>。3本目（<code>&amp;cx=c</code> 付き）は毎回読み込まれるものではなく、条件によって出たり出なかったりする一時的なものでした。<strong>「設定ミスによる常時重複」ではありません。</strong>ChatGPT側の「設定として重複していない」という指摘のほうが正確でした。
       </div>
-
+      <p>現在の Google 関連の読み込みは2本、合計287KBです。</p>
+      <pre class="ev">173KB  gtag/js?id=GT-TX9NK383     ← Site Kit が出力（GA4本体・必要）
+115KB  gtm.js?id=GTM-WFGD8X5Q     ← GTM本体（中身は Meta Pixel のみ）</pre>
+      <p>GA4 は正常に動いています（<code>analytics.google.com/g/collect?tid=G-89WSSYZP65</code> への送信を確認）。<strong>このままでも支障はありません。</strong></p>
+      <p>ひとつだけ気になる点があります。<strong>Meta Pixel 本体（<code>fbevents.js</code>）が読み込まれていません。</strong>トップページの全外部通信8件を調べましたが、Facebook/Meta への通信は1件もありませんでした。つまり今、<strong>GTMの115KBは何も実行していない状態</strong>の可能性があります。</p>
       <div class="check">
-        <div class="lab">できたらこうなる</div>
-        ソースを検索したときの <code>GT-TX9NK383</code> のヒットが減り、次回の計測で JavaScript が <strong>522KB → 250〜350KB</strong> に下がります。
+        <div class="lab">やるなら、これだけ</div>
+        Meta Pixel を<strong>今は使っていない</strong>のであれば、SWELLからGTMのコードを外すと <strong>115KB</strong> 減ります。<br>
+        <strong>使う予定がある</strong>なら、そのままで構いません。0.28秒の話なので、急ぐ必要はありません。
       </div>
     </div>
   </div>
@@ -363,43 +340,67 @@ x-nginx-cache: EXPIRED         今回はちょうど期限切れの瞬間に当�
   <div class="step">
     <div class="step-head">
       <span class="step-no">STEP 2</span>
-      <h3>画像をWebP形式に変換する</h3>
-      <span class="step-meta"><span class="chip gain">−2.0MB</span><span class="chip easy">コード編集なし</span></span>
+      <h3>画像を軽くする（いま最優先）</h3>
+      <span class="step-meta"><span class="chip gain">−2.0MB</span><span class="chip easy">最重要</span></span>
     </div>
     <div class="step-body">
       <div class="why">
-        <b>なぜ必要か：</b>バナー4枚が <b>PNG形式</b>のまま置かれています。PNG はイラストや透過画像用の形式で、<b>写真には向いていません</b>。WebP という新しい形式に変えると、見た目はほぼ同じまま<b>容量が10分の1程度</b>になります。今この4枚だけで 2.2MB あり、ページ全体の8割を占めています。
+        <b>なぜ最優先か：</b>タグの件が小さくなった結果、<b>画像が残る課題のほぼ全部</b>になりました。デスクトップのページ容量 2,823KB のうち <b>2,380KB（84%）が画像</b>です。しかもその大半がバナー4枚で、すべて<b>写真をPNG形式で保存したもの</b>です。PNGはイラストや透過画像用の形式で、写真に使うと容量が数倍〜十数倍に膨れます。
       </div>
       <pre class="ev">633KB  DAIKOKU-TOUR バナー-1024x576.png
 560KB  JDM-TOUR バナー-3-1024x576.png
 545KB  image-1-1024x576.png
 537KB  image-1024x576.png
 ─────
-2,275KB  → WebP なら合計 250KB 程度</pre>
+2,275KB  この4枚だけでページ全体の8割</pre>
 
-      <p style="font-size:13.5px;margin-bottom:10px">すでに <strong>EWWW Image Optimizer</strong> というプラグインが入っているので、設定を変えるだけで実行できます。</p>
+      <p style="font-size:14px;margin:20px 0 8px"><strong>やり方は2通りあります。ルートAから始めるのをおすすめします。</strong></p>
+
+      <h3 style="font-size:15px;margin:22px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--accent)">ルートA：4枚を手作業で入れ替える（確実・20分）</h3>
+      <p style="font-size:13.5px">対象はたった4枚です。手作業でも短時間で終わり、<strong>失敗しようがないのが最大の利点</strong>です。プラグインの設定に左右されません。</p>
       <ol class="howto">
-        <li>WordPress管理画面の <span class="path">設定 → EWWW Image Optimizer</span> を開きます。</li>
-        <li><strong>WebP変換をオンにします。</strong>「Easy Mode」画面なら <strong>「WebP変換」</strong>のスイッチをオン。「Advanced（詳細）」画面なら <strong>WebPタブ</strong>の「JPG/PNG から WebP」にチェックを入れます。</li>
-        <li><strong>配信方法を選びます。</strong>同じWebP設定欄の中に配信方法の選択があります。このサイトは Cloudflare 経由なので <strong>「JS WebP Rewriting」または「&lt;picture&gt; WebP Rewriting」</strong>を選んでください。（.htaccess方式はCloudflareと相性が悪く、うまく届かないことがあります）</li>
-        <li><strong>変更を保存</strong>します。</li>
-        <li><strong>既存の画像を一括変換します。</strong><span class="path">メディア → 一括最適化</span> を開き、<strong>「最適化されていない画像をスキャンする」</strong>→ 見つかったら <strong>「最適化を開始」</strong>を押します。画像の枚数によっては数分かかります。<strong>画面を閉じずに</strong>終わるまで待ってください。</li>
-        <li>終わったら Cloudflare のキャッシュを消します（STEP 5 の手順）。</li>
+        <li><strong>元の画像を用意します。</strong>手元にバナーの元データ（PNG/JPG）があればそれを使います。なければ WordPress管理画面の <span class="path">メディア → ライブラリ</span> から4枚を探し、それぞれ開いて「ファイルをダウンロード」で保存します。</li>
+        <li><strong>変換サイトを開きます。</strong>ブラウザで <span class="path">squoosh.app</span> を開きます。Googleが提供している無料ツールで、<strong>インストール不要・画像はパソコンの外に出ません</strong>。</li>
+        <li><strong>画像をドラッグ＆ドロップ</strong>します。画面が左右に分かれ、左が元画像、右が変換後です。</li>
+        <li><strong>右側の設定を変えます。</strong>右下の「Compress」の形式を <strong>WebP</strong> に変更します。Quality（品質）は <strong>80</strong> のままでOKです。</li>
+        <li><strong>左下と右下の数値を見比べます。</strong>「633 kB → 48 kB」のように表示されます。真ん中の境界線を左右にドラッグすると画質を見比べられます。<strong>見た目が変わらないことを確認</strong>してください。</li>
+        <li>右下の<strong>ダウンロードボタン（↓）</strong>を押して保存します。これを4枚分くり返します。</li>
+        <li><strong>WordPressにアップロードします。</strong><span class="path">メディア → 新規追加</span> で4枚のWebPファイルをアップロードします。</li>
+        <li><strong>ページの画像を差し替えます。</strong>トップページを編集画面で開き、バナー画像のブロックを選択して「置換」から、いまアップロードしたWebP版を選びます。4枚分おこなって<strong>更新</strong>します。</li>
+        <li>Cloudflare のキャッシュを消します（STEP 5 の手順）。</li>
       </ol>
-
       <div class="warn">
-        <div class="lab">念のため</div>
-        一括最適化は元画像を置き換える処理です。作業前に<strong>バックアップ</strong>を取っておくと安心です。EWWW には元画像を保管する設定（Backup originals）もあるので、オンにしておくと元に戻せます。
+        <div class="lab">サイズも一緒に直すと、さらに効きます</div>
+        Lighthouse は「画像の表示サイズが大きすぎる（<strong>2,009KB分の無駄</strong>）」とも指摘しています。Squoosh の右側にある <strong>「Resize」</strong> にチェックを入れ、<strong>Width を 1024</strong> に設定してから変換すると、この無駄も同時に解消できます。
       </div>
-
       <div class="check">
         <div class="lab">できたらこうなる</div>
-        次回の計測で、デスクトップのページ容量が <strong>2,995KB → 800KB前後</strong>に下がります。スマホの通信量も大きく減ります。
+        4枚合計 <strong>2,275KB → 200KB前後</strong>。デスクトップのページ容量が <strong>2,823KB → 750KB前後</strong>に下がります。
+      </div>
+
+      <h3 style="font-size:15px;margin:28px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--rule-strong)">ルートB：EWWWで自動変換する（今後の画像にも効く）</h3>
+      <p style="font-size:13.5px">すでに <strong>EWWW Image Optimizer</strong> が入っています。設定すれば<strong>今後アップロードする画像も自動で軽くなります</strong>。ただしサーバー環境によっては変換が動かないことがあるため、<strong>ルートAを先に済ませてから</strong>取り組むのが安全です。</p>
+      <ol class="howto">
+        <li>WordPress管理画面の <span class="path">設定 → EWWW Image Optimizer</span> を開きます。</li>
+        <li>画面上部に <strong>「Easy Mode」/「Ludicrous Mode」</strong>の切り替えがあります。項目が少ない場合は <strong>Ludicrous Mode</strong> に切り替えると全設定が出ます。</li>
+        <li><strong>WebP変換をオンにします。</strong>「WebP」の項目にある <strong>「JPG/PNG から WebP」</strong>にチェックを入れます。</li>
+        <li>チェックを入れると<strong>配信方法</strong>の選択肢が出ます。このサイトは Cloudflare 経由なので <strong>「JS WebP Rewriting」</strong>を選んでください。<br><span class="path">※ .htaccess 方式は Cloudflare と相性が悪く、変換しても届かないことがあります</span></li>
+        <li><strong>変更を保存</strong>します。</li>
+        <li><strong>既存画像を一括変換します。</strong><span class="path">メディア → 一括最適化</span> →「最適化されていない画像をスキャンする」→「最適化を開始」。枚数によっては数分かかるので、<strong>画面を閉じずに</strong>終わるまで待ちます。</li>
+        <li>Cloudflare のキャッシュを消します（STEP 5）。</li>
+      </ol>
+      <div class="warn">
+        <div class="lab">先にバックアップを</div>
+        一括最適化は元画像を書き換える処理です。EWWWの設定内にある <strong>「元画像を保存（Backup originals）」</strong>をオンにしてから実行すると、問題があったときに戻せます。
+      </div>
+      <div class="check">
+        <div class="lab">うまくいったか確認する方法</div>
+        変換後、サイトを開いて画像を<strong>右クリック →「名前を付けて画像を保存」</strong>を選びます。ファイル名が <strong>.webp</strong> になっていれば成功です。<code>.png</code> のままなら配信設定が効いていないので、手順4の配信方法を見直してください。
       </div>
     </div>
   </div>
 
-  <div class="step">
+<div class="step">
     <div class="step-head">
       <span class="step-no">STEP 3</span>
       <h3>トップの大きな画像を「最優先」で読み込ませる</h3>
@@ -487,15 +488,16 @@ x-nginx-cache: EXPIRED         今回はちょうど期限切れの瞬間に当�
   </div>
   <div class="tablewrap">
   <table class="road">
-    <thead><tr><th>段階</th><th>内容</th><th class="n">モバイル LCP</th><th class="n">JavaScript</th><th class="n">ページ容量</th></tr></thead>
+    <thead><tr><th>段階</th><th>内容</th><th class="n">モバイル LCP</th><th class="n">デスクトップ容量</th></tr></thead>
     <tbody>
-      <tr><td class="now">現在</td><td>—</td><td class="n now">2.54s</td><td class="n">522KB</td><td class="n">2,995KB</td></tr>
-      <tr><td><strong>STEP 1 後</strong></td><td>タグを1本に</td><td class="n">約 1.3〜1.6s</td><td class="n">約 250KB</td><td class="n">約 2,700KB</td></tr>
-      <tr><td class="p2"><strong>STEP 2〜4 後</strong></td><td>画像WebP＋優先読み込み＋preconnect</td><td class="n p2">約 0.9〜1.2s</td><td class="n">約 250KB</td><td class="n p2">約 700KB</td></tr>
+      <tr><td class="now">現在</td><td>—</td><td class="n now">2.72s</td><td class="n">2,823KB</td></tr>
+      <tr><td class="p2"><strong>STEP 2 後</strong></td><td>画像を軽くする（最優先）</td><td class="n p2">約 1.4〜1.8s</td><td class="n p2">約 750KB</td></tr>
+      <tr><td><strong>STEP 3・4 後</strong></td><td>優先読み込み＋preconnect</td><td class="n">約 1.0〜1.3s</td><td class="n">約 750KB</td></tr>
+      <tr><td><strong>STEP 1 後</strong></td><td>GTMを外す（使っていない場合のみ）</td><td class="n">約 0.9〜1.2s</td><td class="n">約 640KB</td></tr>
     </tbody>
   </table>
   </div>
-  <p style="margin-top:18px"><strong>STEP 1 だけで「1秒台」に到達する見込みです。</strong>しかもコード編集は不要で、管理画面の設定を消すだけです。まずここだけ実施して再計測するのが、一番確実で安全な進め方です。</p>
+  <p style="margin-top:18px"><strong>STEP 2 だけで「1秒台」に到達する見込みです。</strong>そして STEP 2 のルートAは、たった4枚の画像を入れ替えるだけです。プラグインの設定にも、コードにも触りません。まずここだけ実施して再計測するのが、一番確実で安全な進め方です。</p>
 </section>
 
 <section>
@@ -515,7 +517,7 @@ x-nginx-cache: EXPIRED         今回はちょうど期限切れの瞬間に当�
 
 <footer>
   <p>+81DRIVE（JDM PRIDE株式会社）／ WordPress + SWELL 2.12.0 ／ Cloudflare ／ EWWW Image Optimizer<br>
-  計測 2026-09-12 05:03 · Lighthouse 12 · 米国 Chicago (ORD) エッジ · モバイル/デスクトップ各3回の中央値</p>
+  計測 2026-09-12 05:48 · Lighthouse 12 · 米国 Phoenix / LAX エッジ · モバイル/デスクトップ各3回の中央値</p>
 </footer>
 
 </div>
