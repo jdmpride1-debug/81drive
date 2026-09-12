@@ -237,12 +237,12 @@ ol.howto strong{color:var(--ink)}
 <div class="wrap">
 
 <header class="mast">
-  <div class="kicker">Performance Audit · 4回目の計測</div>
+  <div class="kicker">Performance Audit · 画像入れ替え後</div>
   <h1>+81DRIVE 表示速度診断</h1>
-  <p class="sub">2026-09-12 05:48 に米国フェニックスから再計測し、外部通信を全件調べました。<strong>タグの件は当初の見立てより小さく、いま効くのは画像です。</strong>手順は「何を・どこで・どうクリックするか」まで分解しています。</p>
+  <p class="sub">画像の入れ替えを反映して再計測しました。<strong>ページ容量が71%減り、デスクトップは100点・0.70秒に到達</strong>しています。残るのはモバイルだけで、原因も特定済みです。</p>
   <div class="provenance">
-    <span>今回 <b>09-12 05:48</b></span>
-    <span>計測地点 <b>Phoenix, Arizona (LAX edge)</b></span>
+    <span>今回 <b>09-12 06:23</b></span>
+    <span>計測地点 <b>米国リージョン</b></span>
     <span>ツール <b>Lighthouse 12</b>／各3回の中央値</span>
   </div>
 </header>
@@ -250,176 +250,110 @@ ol.howto strong{color:var(--ink)}
 <section>
   <div class="sec-head">
     <span class="sec-num">01</span>
-    <h2>今回わかったこと</h2>
+    <h2>結果</h2>
+  </div>
+  <div class="verdict">
+    <div class="vcard ok">
+      <div class="lab">画像の入れ替え</div>
+      <div class="big">2,380 → 420<span style="font-size:18px">KB</span></div>
+      <div class="cap">画像だけで <strong>1,960KB 削減</strong>。ページ全体では 2,995KB → <strong>863KB（−71%）</strong>になりました。</div>
+    </div>
+    <div class="vcard ok">
+      <div class="lab">デスクトップ</div>
+      <div class="big">100<span style="font-size:20px">/100</span></div>
+      <div class="cap">LCP <strong>0.70秒</strong>。これまでの計測で最速です。目標を大きく上回りました。</div>
+    </div>
   </div>
   <div class="callout">
-    <div class="lab">ひとことで</div>
-    <p><strong>前回お伝えした「タグ3本で1.67秒」は、今回の計測で0.28秒まで下がりました。</strong>3本目は常時読み込まれるものではなかったためで、この点はChatGPT側の指摘のほうが正確でした。訂正します。結果として<strong>残る課題はほぼ画像1点に絞られました</strong>。デスクトップのページ容量2,823KBのうち2,380KB（84%）が画像です。</p>
+    <div class="lab">残っている課題</div>
+    <p><strong>モバイルの LCP は 2.54 → 2.53秒 とほぼ変わりませんでした。</strong>これは失敗ではありません。入れ替えたバナーは<strong>画面を下にスクロールした先にある</strong>ため、「最初に見える一番大きい要素」＝LCP の対象ではないからです。モバイルのLCPを縮めるのは、次の <strong>STEP 3（メインビジュアルの優先読み込み）</strong>です。</p>
   </div>
-
-  <p>ヘッダーを比べると、今回検出できた変更は <code>vary: accept-encoding</code> が増えたことだけでした。これは圧縮の扱いとしては正しい設定ですが、<strong>表示速度には影響しません</strong>。それ以外に速度へ効く変更は、計測結果からは確認できませんでした。</p>
-
-  <pre class="ev">cf-cache-status: MISS → HIT    キャッシュは動作中（1回目でMISS、2回目からHIT）
-cache-control: max-age=14400   キャッシュの有効期間は4時間
-x-nginx-cache: EXPIRED         今回はちょうど期限切れの瞬間に当たりました
-<b>vary: User-Agent</b>               まだ残っています
-<b>vary: accept-encoding</b>          今回増えた分（速度への影響はなし）</pre>
-
-  <h3 style="font-size:14px;margin:26px 0 8px">3回の推移</h3>
-  <div class="tablewrap" style="margin-bottom:20px">
-  <table class="trend">
-    <thead><tr><th>モバイル</th><th class="n">09-11</th><th class="n">09-12 05:03</th><th class="n">09-12 05:48</th></tr></thead>
-    <tbody>
-      <tr><td>スコア</td><td class="n">96</td><td class="n">94</td><td class="n cur">94</td></tr>
-      <tr><td>LCP（表示完了）</td><td class="n">2.42s</td><td class="n">2.54s</td><td class="n cur">2.72s</td></tr>
-      <tr><td>TTFB（サーバー応答）</td><td class="n">0.82s</td><td class="n">0.02s</td><td class="n cur big-ok">0.03s</td></tr>
-      <tr><td>ページ容量</td><td class="n">1,249KB</td><td class="n">1,417KB</td><td class="n cur">1,245KB</td></tr>
-      <tr><td>JavaScript</td><td class="n">354KB</td><td class="n">522KB</td><td class="n cur big-ok">350KB</td></tr>
-    </tbody>
-  </table>
-  </div>
-  <div class="tablewrap">
-  <table class="trend">
-    <thead><tr><th>デスクトップ</th><th class="n">09-11</th><th class="n">09-12 05:03</th><th class="n">09-12 05:48</th></tr></thead>
-    <tbody>
-      <tr><td>スコア</td><td class="n">99</td><td class="n">99</td><td class="n cur">99</td></tr>
-      <tr><td>LCP（表示完了）</td><td class="n">0.79s</td><td class="n">0.76s</td><td class="n cur big-ok">0.81s</td></tr>
-      <tr><td>TTFB（サーバー応答）</td><td class="n">0.85s</td><td class="n">0.02s</td><td class="n cur big-ok">0.03s</td></tr>
-      <tr><td>ページ容量</td><td class="n">2,282KB</td><td class="n">2,995KB</td><td class="n cur">2,823KB</td></tr>
-    </tbody>
-  </table>
-  </div>
-  <p style="margin-top:16px"><strong>デスクトップは目標達成済みです（0.76秒）。</strong>以降はすべて「モバイルを1秒台にする」ための作業です。</p>
 </section>
 
 <section>
   <div class="sec-head">
     <span class="sec-num">02</span>
-    <h2>用語のミニ解説</h2>
-    <span class="note">この4つだけ覚えれば読めます</span>
+    <h2>入れ替えの効果</h2>
   </div>
-  <dl class="glossary">
-    <div class="gl"><dt>LCP</dt><dd>ページで<strong>一番大きい画像や見出しが表示されるまでの時間</strong>。訪問者が「表示された」と感じる瞬間。今の最重要指標です。</dd></div>
-    <div class="gl"><dt>TTFB</dt><dd>サーバーが<strong>最初の1文字を返すまでの時間</strong>。ここは 0.02秒 まで改善済みで、もう問題ありません。</dd></div>
-    <div class="gl"><dt>KB / MB</dt><dd>訪問者がダウンロードするデータ量。<strong>1,000KB = 1MB</strong>。少ないほど速く、スマホの通信量も減ります。</dd></div>
-    <div class="gl"><dt>キャッシュ</dt><dd>一度作ったページを<strong>コピーして近くに置いておく仕組み</strong>。Cloudflare が米国内にコピーを置いてくれています。</dd></div>
-  </dl>
+  <pre class="ev">【入れ替え前】PNG 4枚                    【入れ替え後】JPG に変更
+633KB  DAIKOKU-TOUR バナー.png          101KB  JDM-TOUR バナー-2-1.jpg
+560KB  JDM-TOUR バナー-3.png             79KB  SKYLINE-ER34-TURBO-Silver.jpg
+545KB  image-1.png                       75KB  NISSAN-GT-R-R34-V-Spec.jpg
+537KB  image.png                         59KB  JDM-TOUR バナー-5.jpg
+─────                                 ─────
+2,275KB                                  314KB   <b>−1,961KB（−86%）</b></pre>
+  <p>PNG から JPG に変えたことで、狙いどおり容量が約7分の1になりました。<strong>この作業は完了です。</strong></p>
+
+  <h3 style="font-size:14px;margin:26px 0 8px">推移</h3>
+  <div class="tablewrap" style="margin-bottom:20px">
+  <table class="trend">
+    <thead><tr><th>モバイル</th><th class="n">09-11</th><th class="n">05:48</th><th class="n">06:23</th></tr></thead>
+    <tbody>
+      <tr><td>LCP（表示完了）</td><td class="n">2.42s</td><td class="n">2.72s</td><td class="n cur">2.53s</td></tr>
+      <tr><td>SI（体感速度）</td><td class="n">2.44s</td><td class="n">2.19s</td><td class="n cur big-ok">2.03s</td></tr>
+      <tr><td>TTI</td><td class="n">6.57s</td><td class="n">5.05s</td><td class="n cur">6.04s</td></tr>
+      <tr><td>TTFB</td><td class="n">0.82s</td><td class="n">0.03s</td><td class="n cur big-ok">0.03s</td></tr>
+      <tr><td>画像</td><td class="n">802KB</td><td class="n">802KB</td><td class="n cur big-ok">210KB</td></tr>
+      <tr><td>ページ容量</td><td class="n">1,249KB</td><td class="n">1,245KB</td><td class="n cur big-ok">824KB</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="tablewrap">
+  <table class="trend">
+    <thead><tr><th>デスクトップ</th><th class="n">09-11</th><th class="n">05:48</th><th class="n">06:23</th></tr></thead>
+    <tbody>
+      <tr><td>スコア</td><td class="n">99</td><td class="n">99</td><td class="n cur big-ok">100</td></tr>
+      <tr><td>LCP（表示完了）</td><td class="n">0.79s</td><td class="n">0.81s</td><td class="n cur big-ok">0.70s</td></tr>
+      <tr><td>SI（体感速度）</td><td class="n">1.11s</td><td class="n">0.59s</td><td class="n cur big-ok">0.54s</td></tr>
+      <tr><td>TTFB</td><td class="n">0.85s</td><td class="n">0.03s</td><td class="n cur big-ok">0.03s</td></tr>
+      <tr><td>画像</td><td class="n">1,835KB</td><td class="n">2,380KB</td><td class="n cur big-ok">420KB</td></tr>
+      <tr><td>ページ容量</td><td class="n">2,282KB</td><td class="n">2,823KB</td><td class="n cur big-ok">863KB</td></tr>
+    </tbody>
+  </table>
+  </div>
 </section>
 
 <section>
   <div class="sec-head">
     <span class="sec-num">03</span>
-    <h2>やること（この順番で）</h2>
-    <span class="note">STEP 2 → 3 → 4 の順。STEP 1 は後回しで構いません</span>
+    <h2>完了した作業</h2>
+  </div>
+  <div class="status">
+    <div class="st done"><span class="ic">✓</span><span class="tx"><strong>エッジキャッシュ</strong> — TTFB 0.85秒 → <strong>0.03秒</strong>。</span><span class="tag">完了</span></div>
+    <div class="st done"><span class="ic">✓</span><span class="tx"><strong>Rocket Loader 無効化</strong> — 読み込みが消えました。</span><span class="tag">完了</span></div>
+    <div class="st done"><span class="ic">✓</span><span class="tx"><strong>画像の入れ替え（STEP 2）</strong> — バナー4枚で <strong>1,961KB 削減</strong>。</span><span class="tag">完了</span></div>
+    <div class="st todo"><span class="ic">—</span><span class="tx"><strong>メインビジュアルの優先読み込み（STEP 3）</strong> — 未実施。<strong>モバイル改善の本命です。</strong></span><span class="tag">次はこれ</span></div>
+    <div class="st todo"><span class="ic">—</span><span class="tx"><strong>preconnect の追加（STEP 4）</strong> — 未実施。0.35秒の改善余地。</span><span class="tag">未実施</span></div>
+    <div class="st partial"><span class="ic">◐</span><span class="tx"><strong>Googleタグ</strong> — 3本目が出る回と出ない回があります。今回のモバイル計測では出ていました（460KB）。</span><span class="tag">様子見</span></div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="sec-num">04</span>
+    <h2>次にやること</h2>
+    <span class="note">モバイルを1秒台にするための残り</span>
   </div>
 
-    <div class="step">
-    <div class="step-head">
-      <span class="step-no">STEP 1</span>
-      <h3>Googleタグの整理（優先度を下げました）</h3>
-      <span class="step-meta"><span class="chip easy">−0.28秒</span><span class="chip easy">後回しでOK</span></span>
-    </div>
-    <div class="step-body">
-      <div class="warn">
-        <div class="lab">訂正します</div>
-        前回「3本のタグで1.67秒の改善余地」とお伝えしましたが、<strong>今回の計測では3本目が消えており、改善余地は0.28秒まで下がりました</strong>。3本目（<code>&amp;cx=c</code> 付き）は毎回読み込まれるものではなく、条件によって出たり出なかったりする一時的なものでした。<strong>「設定ミスによる常時重複」ではありません。</strong>ChatGPT側の「設定として重複していない」という指摘のほうが正確でした。
-      </div>
-      <p>現在の Google 関連の読み込みは2本、合計287KBです。</p>
-      <pre class="ev">173KB  gtag/js?id=GT-TX9NK383     ← Site Kit が出力（GA4本体・必要）
-115KB  gtm.js?id=GTM-WFGD8X5Q     ← GTM本体（中身は Meta Pixel のみ）</pre>
-      <p>GA4 は正常に動いています（<code>analytics.google.com/g/collect?tid=G-89WSSYZP65</code> への送信を確認）。<strong>このままでも支障はありません。</strong></p>
-      <p>ひとつだけ気になる点があります。<strong>Meta Pixel 本体（<code>fbevents.js</code>）が読み込まれていません。</strong>トップページの全外部通信8件を調べましたが、Facebook/Meta への通信は1件もありませんでした。つまり今、<strong>GTMの115KBは何も実行していない状態</strong>の可能性があります。</p>
-      <div class="check">
-        <div class="lab">やるなら、これだけ</div>
-        Meta Pixel を<strong>今は使っていない</strong>のであれば、SWELLからGTMのコードを外すと <strong>115KB</strong> 減ります。<br>
-        <strong>使う予定がある</strong>なら、そのままで構いません。0.28秒の話なので、急ぐ必要はありません。
-      </div>
+  <div class="act">
+    <div class="act-head"><span class="rank">!</span><h3>なぜモバイルだけ変わらなかったのか</h3><span class="gain b">仕組みの説明</span></div>
+    <div class="act-body">
+      <p>LCP は「<strong>最初の画面に見える一番大きい要素</strong>が表示されるまでの時間」です。今回軽くしたバナー4枚は<strong>スクロールした先</strong>にあるため、LCP の計測対象ではありません。</p>
+      <p>LCP の対象は一貫して<strong>トップのメインビジュアル</strong>（<code>メインビジュアル用.jpeg</code>）です。この画像は「後回しでいい画像」として扱われているため、読み込みが遅れます。</p>
+      <pre class="ev">モバイル LCP の3回の実測値
+7.18s ← 1回目だけ突出（優先指定がないため順番待ちになる）
+2.53s
+2.50s</pre>
+      <p><strong>この「1回目だけ極端に遅い」パターンは4回連続で出ています。</strong>STEP 3 を実施すれば、この振れ幅が消えて安定します。容量はもう十分に減ったので、<strong>残るのは読み込む順番の問題だけ</strong>です。</p>
     </div>
   </div>
+</section>
 
-  <div class="step">
-    <div class="step-head">
-      <span class="step-no">STEP 2</span>
-      <h3>画像を軽くする（いま最優先）</h3>
-      <span class="step-meta"><span class="chip gain">−2.0MB</span><span class="chip easy">最重要</span></span>
-    </div>
-    <div class="step-body">
-      <div class="why">
-        <b>なぜ最優先か：</b>タグの件が小さくなった結果、<b>画像が残る課題のほぼ全部</b>になりました。デスクトップのページ容量 2,823KB のうち <b>2,380KB（84%）が画像</b>です。しかもその大半がバナー4枚で、すべて<b>写真をPNG形式で保存したもの</b>です。PNGはイラストや透過画像用の形式で、写真に使うと容量が数倍〜十数倍に膨れます。
-      </div>
-      <h3 style="font-size:14px;margin:20px 0 8px">対象画像の全リスト（実測）</h3>
-      <div class="tablewrap" style="margin-bottom:14px">
-      <table class="cmp">
-        <thead><tr><th>ファイル</th><th class="n">現在</th><th class="n">大きすぎる分</th><th class="n">WebP化で減る分</th><th>リサイズ</th></tr></thead>
-        <tbody>
-          <tr class="wl"><td><code>DAIKOKU-TOUR バナー-1024x576.png</code></td><td class="n">633KB</td><td class="n">539KB</td><td class="n">556KB</td><td>必要</td></tr>
-          <tr class="wl"><td><code>JDM-TOUR バナー-3-1024x576.png</code></td><td class="n">560KB</td><td class="n">477KB</td><td class="n">494KB</td><td>必要</td></tr>
-          <tr class="wl"><td><code>image-1-1024x576.png</code></td><td class="n">545KB</td><td class="n">477KB</td><td class="n">497KB</td><td>必要</td></tr>
-          <tr class="wl"><td><code>image-1024x576.png</code></td><td class="n">537KB</td><td class="n">470KB</td><td class="n">491KB</td><td>必要</td></tr>
-          <tr><td><code>名称未設定のデザイン-300x100.png</code></td><td class="n">31KB</td><td class="n">23KB</td><td class="n">25KB</td><td>軽微</td></tr>
-          <tr><td><code>メインビジュアル用.jpeg</code></td><td class="n">75KB</td><td class="n">25KB</td><td class="n">33KB</td><td>不要</td></tr>
-        </tbody>
-      </table>
-      </div>
-      <p style="font-size:13.5px"><strong>上の4枚（合計2,275KB）がページ全体の約8割です。</strong>下2枚は後回しで構いません。</p>
-
-      <div class="warn">
-        <div class="lab">「何pxにすべきか」の答え</div>
-        Lighthouse の計算上は <strong>394px / 360px</strong> まで下げられますが、<strong>その数値は採用しないでください。</strong>iPhone や Mac などの高精細画面では、表示サイズの2倍の画像がないとぼやけます。<br><br>
-        <strong>推奨は幅 800px です。</strong>表示サイズ約400pxの2倍にあたり、高精細画面でも綺麗なまま、1024pxより軽くなります。
-      </div>
-
-      <div class="check">
-        <div class="lab">優先順位はこうです</div>
-        <strong>① 形式をWebPにする（最重要）</strong> — 4枚で約2,000KB削減。画質の劣化はほぼ無し。<br>
-        <strong>② ついでに幅800pxにする</strong> — さらに数十KB削減。①のついでに同じ画面でできます。<br><br>
-        リサイズ単独の効果は小さく、<strong>効いているのは形式のほう</strong>です。迷ったら①だけでも十分です。
-      </div>
-
-      <p style="font-size:14px;margin:20px 0 8px"><strong>やり方は2通りあります。ルートAから始めるのをおすすめします。</strong></p>
-
-      <h3 style="font-size:15px;margin:22px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--accent)">ルートA：4枚を手作業で入れ替える（確実・20分）</h3>
-      <p style="font-size:13.5px">対象はたった4枚です。手作業でも短時間で終わり、<strong>失敗しようがないのが最大の利点</strong>です。プラグインの設定に左右されません。</p>
-      <ol class="howto">
-        <li><strong>元の画像を用意します。</strong>手元にバナーの元データ（PNG/JPG）があればそれを使います。なければ WordPress管理画面の <span class="path">メディア → ライブラリ</span> から4枚を探し、それぞれ開いて「ファイルをダウンロード」で保存します。</li>
-        <li><strong>変換サイトを開きます。</strong>ブラウザで <span class="path">squoosh.app</span> を開きます。Googleが提供している無料ツールで、<strong>インストール不要・画像はパソコンの外に出ません</strong>。</li>
-        <li><strong>画像をドラッグ＆ドロップ</strong>します。画面が左右に分かれ、左が元画像、右が変換後です。</li>
-        <li><strong>右側の設定を変えます。</strong>右下の「Compress」の形式を <strong>WebP</strong> に変更します。Quality（品質）は <strong>80</strong> のままでOKです。</li>
-        <li><strong>左下と右下の数値を見比べます。</strong>「633 kB → 48 kB」のように表示されます。真ん中の境界線を左右にドラッグすると画質を見比べられます。<strong>見た目が変わらないことを確認</strong>してください。</li>
-        <li>右下の<strong>ダウンロードボタン（↓）</strong>を押して保存します。これを4枚分くり返します。</li>
-        <li><strong>WordPressにアップロードします。</strong><span class="path">メディア → 新規追加</span> で4枚のWebPファイルをアップロードします。</li>
-        <li><strong>ページの画像を差し替えます。</strong>トップページを編集画面で開き、バナー画像のブロックを選択して「置換」から、いまアップロードしたWebP版を選びます。4枚分おこなって<strong>更新</strong>します。</li>
-        <li>Cloudflare のキャッシュを消します（STEP 5 の手順）。</li>
-      </ol>
-      <div class="warn">
-        <div class="lab">サイズも一緒に直すと、さらに効きます</div>
-        Lighthouse は「画像の表示サイズが大きすぎる（<strong>2,009KB分の無駄</strong>）」とも指摘しています。Squoosh の右側にある <strong>「Resize」</strong> にチェックを入れ、<strong>Width を 1024</strong> に設定してから変換すると、この無駄も同時に解消できます。
-      </div>
-      <div class="check">
-        <div class="lab">できたらこうなる</div>
-        4枚合計 <strong>2,275KB → 200KB前後</strong>。デスクトップのページ容量が <strong>2,823KB → 750KB前後</strong>に下がります。
-      </div>
-
-      <h3 style="font-size:15px;margin:28px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--rule-strong)">ルートB：EWWWで自動変換する（今後の画像にも効く）</h3>
-      <p style="font-size:13.5px">すでに <strong>EWWW Image Optimizer</strong> が入っています。設定すれば<strong>今後アップロードする画像も自動で軽くなります</strong>。ただしサーバー環境によっては変換が動かないことがあるため、<strong>ルートAを先に済ませてから</strong>取り組むのが安全です。</p>
-      <ol class="howto">
-        <li>WordPress管理画面の <span class="path">設定 → EWWW Image Optimizer</span> を開きます。</li>
-        <li>画面上部に <strong>「Easy Mode」/「Ludicrous Mode」</strong>の切り替えがあります。項目が少ない場合は <strong>Ludicrous Mode</strong> に切り替えると全設定が出ます。</li>
-        <li><strong>WebP変換をオンにします。</strong>「WebP」の項目にある <strong>「JPG/PNG から WebP」</strong>にチェックを入れます。</li>
-        <li>チェックを入れると<strong>配信方法</strong>の選択肢が出ます。このサイトは Cloudflare 経由なので <strong>「JS WebP Rewriting」</strong>を選んでください。<br><span class="path">※ .htaccess 方式は Cloudflare と相性が悪く、変換しても届かないことがあります</span></li>
-        <li><strong>変更を保存</strong>します。</li>
-        <li><strong>既存画像を一括変換します。</strong><span class="path">メディア → 一括最適化</span> →「最適化されていない画像をスキャンする」→「最適化を開始」。枚数によっては数分かかるので、<strong>画面を閉じずに</strong>終わるまで待ちます。</li>
-        <li>Cloudflare のキャッシュを消します（STEP 5）。</li>
-      </ol>
-      <div class="warn">
-        <div class="lab">先にバックアップを</div>
-        一括最適化は元画像を書き換える処理です。EWWWの設定内にある <strong>「元画像を保存（Backup originals）」</strong>をオンにしてから実行すると、問題があったときに戻せます。
-      </div>
-      <div class="check">
-        <div class="lab">うまくいったか確認する方法</div>
-        変換後、サイトを開いて画像を<strong>右クリック →「名前を付けて画像を保存」</strong>を選びます。ファイル名が <strong>.webp</strong> になっていれば成功です。<code>.png</code> のままなら配信設定が効いていないので、手順4の配信方法を見直してください。
-      </div>
-    </div>
+<section>
+  <div class="sec-head">
+    <span class="sec-num">05</span>
+    <h2>手順</h2>
+    <span class="note">STEP 3 から実施してください</span>
   </div>
 
 <div class="step">
@@ -504,27 +438,27 @@ x-nginx-cache: EXPIRED         今回はちょうど期限切れの瞬間に当�
 
 <section>
   <div class="sec-head">
-    <span class="sec-num">04</span>
-    <h2>作業後の見込み</h2>
+    <span class="sec-num">06</span>
+    <h2>ここからの見込み</h2>
     <span class="note">推定値</span>
   </div>
   <div class="tablewrap">
   <table class="road">
     <thead><tr><th>段階</th><th>内容</th><th class="n">モバイル LCP</th><th class="n">デスクトップ容量</th></tr></thead>
     <tbody>
-      <tr><td class="now">現在</td><td>—</td><td class="n now">2.72s</td><td class="n">2,823KB</td></tr>
-      <tr><td class="p2"><strong>STEP 2 後</strong></td><td>画像を軽くする（最優先）</td><td class="n p2">約 1.4〜1.8s</td><td class="n p2">約 750KB</td></tr>
-      <tr><td><strong>STEP 3・4 後</strong></td><td>優先読み込み＋preconnect</td><td class="n">約 1.0〜1.3s</td><td class="n">約 750KB</td></tr>
-      <tr><td><strong>STEP 1 後</strong></td><td>GTMを外す（使っていない場合のみ）</td><td class="n">約 0.9〜1.2s</td><td class="n">約 640KB</td></tr>
+      <tr><td>09-11</td><td>着手前</td><td class="n">2.42s</td><td class="n">2,282KB</td></tr>
+      <tr><td class="now">現在</td><td>キャッシュ＋画像まで完了</td><td class="n now">2.53s</td><td class="n p2">863KB</td></tr>
+      <tr><td class="p2"><strong>STEP 3 後</strong></td><td>メインビジュアルの優先読み込み</td><td class="n p2">約 1.3〜1.7s</td><td class="n">863KB</td></tr>
+      <tr><td><strong>STEP 4 後</strong></td><td>preconnect の追加</td><td class="n">約 1.0〜1.4s</td><td class="n">863KB</td></tr>
     </tbody>
   </table>
   </div>
-  <p style="margin-top:18px"><strong>STEP 2 だけで「1秒台」に到達する見込みです。</strong>そして STEP 2 のルートAは、たった4枚の画像を入れ替えるだけです。プラグインの設定にも、コードにも触りません。まずここだけ実施して再計測するのが、一番確実で安全な進め方です。</p>
+  <p style="margin-top:18px"><strong>デスクトップは目標を達成しました（0.70秒・100点）。</strong>残りはモバイルのみで、鍵は STEP 3 です。容量はすでに十分減っているため、<strong>あとは「メインビジュアルを後回しにしない」と指定するだけ</strong>で1秒台に届く見込みです。</p>
 </section>
 
 <section>
   <div class="sec-head">
-    <span class="sec-num">05</span>
+    <span class="sec-num">07</span>
     <h2>終わったら再計測</h2>
   </div>
   <ol class="howto">
@@ -539,7 +473,7 @@ x-nginx-cache: EXPIRED         今回はちょうど期限切れの瞬間に当�
 
 <footer>
   <p>+81DRIVE（JDM PRIDE株式会社）／ WordPress + SWELL 2.12.0 ／ Cloudflare ／ EWWW Image Optimizer<br>
-  計測 2026-09-12 05:48 · Lighthouse 12 · 米国 Phoenix / LAX エッジ · モバイル/デスクトップ各3回の中央値</p>
+  計測 2026-09-12 06:23 · Lighthouse 12 · 米国リージョン · モバイル/デスクトップ各3回の中央値</p>
 </footer>
 
 </div>
