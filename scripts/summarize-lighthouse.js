@@ -146,6 +146,43 @@ function section(label, reports) {
     out.push('');
   }
 
+  // Per-image detail. Filenames on this site are Japanese and arrive percent-encoded,
+  // so decode them; pair each image with what Lighthouse says is wasted on it.
+  const dec = (u) => { try { return decodeURIComponent(u); } catch { return u; } };
+  const byUrl = (auditId) => {
+    const m = new Map();
+    for (const it of reports[0]?.audits?.[auditId]?.details?.items || []) {
+      if (it.url) m.set(it.url, it);
+    }
+    return m;
+  };
+  const oversized = byUrl('uses-responsive-images');
+  const webpable = byUrl('modern-image-formats');
+  const images = reqs.filter((r) => r.resourceType === 'Image' && r.transferSize > 1024);
+
+  if (images.length) {
+    out.push('### Image detail');
+    out.push('| Transfer | Oversized by | WebP saving | Suggested width | File |');
+    out.push('|---|---|---|---|---|');
+    for (const r of images.sort((a, b) => (b.transferSize || 0) - (a.transferSize || 0))) {
+      const over = oversized.get(r.url);
+      const web = webpable.get(r.url);
+      // wastedPercent is area; linear scale is its square root.
+      let suggested = '-';
+      const wmatch = dec(r.url).match(/-(\d+)x(\d+)\.(png|jpe?g|webp)$/i);
+      if (over?.wastedPercent && wmatch) {
+        const curW = Number(wmatch[1]);
+        const scale = Math.sqrt(Math.max(0, 1 - over.wastedPercent / 100));
+        suggested = `${Math.round(curW * scale)}px (now ${curW}px)`;
+      } else if (wmatch) {
+        suggested = `ok (${wmatch[1]}px)`;
+      }
+      const file = dec(r.url).replace(/^https?:\/\/[^/]+/, '');
+      out.push(`| ${kb(r.transferSize)} | ${over ? kb(over.wastedBytes) : '-'} | ${web ? kb(web.wastedBytes) : '-'} | ${suggested} | \`${file}\` |`);
+    }
+    out.push('');
+  }
+
   // Every third-party request in full. The top-20 list above is truncated, and
   // when tag setups are in question the whole list is what settles the argument.
   const tp = reports[0]?.audits?.['third-party-summary']?.details?.items || [];
