@@ -237,11 +237,11 @@ ol.howto strong{color:var(--ink)}
 <div class="wrap">
 
 <header class="mast">
-  <div class="kicker">Performance Audit · 遅延読み込み設定後</div>
+  <div class="kicker">Performance Audit · キャッシュ問題の特定</div>
   <h1>+81DRIVE 表示速度診断</h1>
-  <p class="sub">Lazy Load の除外設定を反映して再計測しました。<strong>モバイルは改善しましたが、デスクトップに古いキャッシュが配信される問題</strong>を検出しました。先にこれを解消する必要があります。</p>
+  <p class="sub">計測値が回ごとに入れ替わる原因を特定しました。<strong>Cloudflare のキャッシュが削除されておらず、画像入れ替え前のページが配信されています。</strong>これを消すまで、正しい計測も、訪問者への反映もできません。</p>
   <div class="provenance">
-    <span>今回 <b>09-12 06:57</b></span>
+    <span>今回 <b>09-12 07:15</b></span>
     <span>計測地点 <b>米国リージョン</b></span>
     <span>ツール <b>Lighthouse 12</b>／各3回の中央値</span>
   </div>
@@ -253,46 +253,52 @@ ol.howto strong{color:var(--ink)}
     <h2>結果</h2>
   </div>
   <div class="verdict">
-    <div class="vcard ok">
-      <div class="lab">モバイル</div>
-      <div class="big">824 → 584<span style="font-size:18px">KB</span></div>
-      <div class="cap">さらに <strong>240KB 削減</strong>。TTI も 6.04秒 → <strong>5.32秒</strong>、スコアは 94 → <strong>95</strong> に改善しました。</div>
-    </div>
     <div class="vcard crit">
-      <div class="lab">デスクトップ（今回の数値は無効）</div>
-      <div class="big">PNG 4枚<span style="font-size:18px"> が復活</span></div>
-      <div class="cap">削除したはずの旧PNG（633/560/545/537KB）が配信されました。<strong>Cloudflare が古いHTMLを返しています。</strong></div>
+      <div class="lab">配信されているページの古さ</div>
+      <div class="big">2<span style="font-size:20px">時間</span>13<span style="font-size:20px">分前</span></div>
+      <div class="cap"><code>age: 8016</code>。<strong>画像を入れ替える前</strong>に保存されたコピーがそのまま配信されています。</div>
+    </div>
+    <div class="vcard ok">
+      <div class="lab">やることは1つだけ</div>
+      <div class="big">Purge<span style="font-size:20px"> Everything</span></div>
+      <div class="cap">Cloudflare でキャッシュを削除するだけです。<strong>サーバーやページ側に問題はありません。</strong></div>
     </div>
   </div>
   <div class="callout">
-    <div class="lab">先にやること</div>
-    <p><strong>Cloudflare のキャッシュを削除してください（Purge Everything）。</strong>デスクトップ用のキャッシュだけが画像入れ替え前の状態で止まっており、このままでは正しい計測ができません。実際の訪問者にも古いページが表示されている可能性があります。</p>
+    <div class="lab">訪問者にも影響しています</div>
+    <p>これは計測だけの問題ではありません。<strong>いま 81drive.com を開いた人にも、入れ替え前の重いページが表示されています。</strong>放置しても4時間で自然に切れますが、削除すれば即座に解消します。</p>
   </div>
 </section>
 
 <section>
   <div class="sec-head">
     <span class="sec-num">02</span>
-    <h2>なぜデスクトップだけ古いのか</h2>
+    <h2>原因は確定しました</h2>
+    <span class="note">07:15 のレスポンスヘッダー</span>
   </div>
-  <p>同じ1回の計測の中で、モバイルとデスクトップで<strong>配信されている内容が違いました</strong>。</p>
-  <pre class="ev">モバイル（正しい・入れ替え後）      デスクトップ（古い・入れ替え前）
- 75KB  JDM-TOUR バナー-5.jpg       633KB  DAIKOKU-TOUR バナー.png
- 37KB  メインビジュアル用.jpeg       560KB  JDM-TOUR バナー-3.png
- 31KB  名称未設定のデザイン.png       545KB  image-1.png
-─────                            537KB  image.png
-142KB  合計                      ─────
-                                 2,380KB  合計</pre>
-  <p>原因は、以前から指摘している <code>vary: User-Agent</code> と、キャッシュ期間 <code>max-age=14400</code>（4時間）の組み合わせです。</p>
-  <ul style="color:var(--ink-2);max-width:70ch">
-    <li><code>vary: User-Agent</code> があると、Cloudflare は<strong>ブラウザの種類ごとに別々のコピー</strong>を保存します。</li>
-    <li>モバイル用のコピーは新しい内容に更新されましたが、<strong>デスクトップ用のコピーは入れ替え前のまま</strong>残っていました。</li>
-    <li>さらに Cloudflare は世界中の拠点ごとに独立してキャッシュを持つため、どの拠点に当たるかで内容が変わります（今回は LAX・ORD・IAD など回ごとに別拠点でした）。</li>
-  </ul>
+  <pre class="ev"><b>age: 8016</b>                                    ← 2時間13分前のコピー
+<b>last-modified: Sat, 12 Sep 2026 05:02:22 GMT</b>  ← 画像入れ替え<b>前</b>の版
+cache-control: max-age=14400                     ← 4時間保持される
+<b>cf-cache-status: HIT</b>                             ← キャッシュから配信
+cf-ray: a39d1fc81a1161ad-ORD</pre>
+  <p><strong><code>age: 8016</code> は「このコピーは 8,016秒（2時間13分）前に保存された」という意味です。</strong>キャッシュを削除していれば、ここは <code>0</code> に戻ります。</p>
+  <p>さらに <code>last-modified</code> は <strong>05:02</strong>。画像の入れ替えが反映されたのを最初に確認したのが 06:23 なので、<strong>配信されているのは入れ替え前のページ</strong>で確定です。</p>
   <div class="callout">
-    <div class="lab">これは計測だけの問題ではありません</div>
-    <p><strong>実際の訪問者にも、古いページが表示されている可能性があります。</strong>パソコンから見ている人には入れ替え前のバナーが出ているかもしれません。シークレットウィンドウでパソコンから開いて確認してみてください。</p>
+    <div class="lab">結論</div>
+    <p><strong>Cloudflare のキャッシュ削除（Purge Everything）が実行されていません。</strong>サーバー側の問題でも、ページ更新の失敗でもありません。削除すれば即座に解決します。</p>
   </div>
+  <p>新旧が入れ替わって見えたのは、<strong>Cloudflare が世界中の拠点ごとに独立したキャッシュを持つ</strong>ためです。入れ替え後に新しく取得した拠点は新しいページを、05:02 の版を保持したままの拠点は古いページを返します。<code>vary: User-Agent</code> がこれをさらに分割し、同じ拠点でもパソコンとスマホで別々のコピーになります。</p>
+
+  <h3 style="font-size:14px;margin:26px 0 8px">追加で見つかった旧PNG</h3>
+  <p>HTMLが参照している画像を全件調べたところ、<strong>まだ対応していない旧PNGが他に7枚</strong>ありました。ページ下部にあり遅延読み込みされるため、これまでの計測には現れていませんでした。</p>
+  <pre class="ev">/wp-content/uploads/2026/08/498.png
+/wp-content/uploads/2026/08/499.png
+/wp-content/uploads/2026/08/500.png
+/wp-content/uploads/2026/08/NSX.png
+/wp-content/uploads/2026/08/Supra.png
+/wp-content/uploads/2026/08/TOKYO-TOWER.png
+/wp-content/uploads/2026/08/WebSite用-画像生成-54.png</pre>
+  <p><strong>計測値には出ませんが、下までスクロールした訪問者は実際にダウンロードしています。</strong>キャッシュの件が片付いたら、この7枚も同じ手順（Squoosh）で軽くする価値があります。</p>
 
   <h3 style="font-size:14px;margin:26px 0 8px">推移</h3>
   <div class="tablewrap" style="margin-bottom:20px">
