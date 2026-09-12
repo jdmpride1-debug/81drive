@@ -192,14 +192,57 @@ footer a{color:var(--accent)}
 @media (max-width:560px){.st{grid-template-columns:22px 1fr;row-gap:4px}.st .tag{grid-column:2}}
 </style>
 
+<style>
+/* --- step guide --- */
+.step{background:var(--surface);border:1px solid var(--rule);border-radius:3px;margin-bottom:18px;box-shadow:var(--shadow);overflow:hidden}
+.step-head{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:15px 18px;background:var(--surface-2);border-bottom:1px solid var(--rule)}
+.step-no{font-family:"Saira Condensed",sans-serif;font-size:12px;font-weight:700;letter-spacing:.1em;color:#fff;background:var(--accent);border-radius:2px;padding:3px 9px;white-space:nowrap}
+.step-head h3{font-size:16px;font-weight:700}
+.step-meta{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:11px;font-weight:600;letter-spacing:.04em;padding:3px 8px;border-radius:2px;white-space:nowrap}
+.chip.gain{background:var(--good-soft);color:var(--good)}
+.chip.easy{background:var(--surface);border:1px solid var(--rule-strong);color:var(--muted)}
+.step-body{padding:18px}
+.why{background:var(--surface-2);border-left:3px solid var(--rule-strong);padding:12px 14px;border-radius:0 3px 3px 0;margin-bottom:18px;font-size:13.5px;color:var(--ink-2)}
+.why b{color:var(--ink)}
+ol.howto{margin:0;padding:0;list-style:none;counter-reset:ht}
+ol.howto>li{counter-increment:ht;position:relative;padding-left:34px;margin-bottom:15px;color:var(--ink-2)}
+ol.howto>li::before{
+  content:counter(ht);position:absolute;left:0;top:1px;
+  width:22px;height:22px;border-radius:50%;background:var(--ink);color:var(--ground);
+  font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;
+  display:flex;align-items:center;justify-content:center
+}
+ol.howto>li:last-child{margin-bottom:0}
+ol.howto strong{color:var(--ink)}
+.path{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:12.5px;background:var(--surface-2);border:1px solid var(--rule);border-radius:2px;padding:2px 7px;margin:1px 0}
+.check{background:var(--good-soft);border:1px solid var(--good);border-radius:3px;padding:12px 14px;margin-top:16px;font-size:13.5px;color:var(--ink)}
+.check .lab{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--good);font-weight:700;margin-bottom:5px}
+.warn{background:var(--warn-soft);border:1px solid var(--warn);border-radius:3px;padding:12px 14px;margin-top:14px;font-size:13.5px;color:var(--ink)}
+.warn .lab{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--warn);font-weight:700;margin-bottom:5px}
+.glossary{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.gl{background:var(--surface);border:1px solid var(--rule);border-radius:3px;padding:14px 16px}
+.gl dt{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:15px;letter-spacing:.04em;color:var(--accent);margin-bottom:4px}
+.gl dd{margin:0;font-size:13.5px;color:var(--ink-2)}
+.trend{width:100%;border-collapse:collapse;font-size:13.5px}
+.trend th,.trend td{padding:9px 10px;border-bottom:1px solid var(--rule);text-align:left;white-space:nowrap}
+.trend th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;border-bottom:1px solid var(--rule-strong)}
+.trend td.n{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;text-align:right}
+.trend tr:last-child td{border-bottom:none}
+.trend .cur{font-weight:700;color:var(--ink)}
+.flat{color:var(--warn);font-weight:600}
+.big-ok{color:var(--good);font-weight:600}
+</style>
+
+<div class="wrap">
+
 <header class="mast">
-  <div class="kicker">Performance Audit · 再計測</div>
+  <div class="kicker">Performance Audit · 3回目の計測</div>
   <h1>+81DRIVE 表示速度診断</h1>
-  <p class="sub">変更後の 81drive.com を米国内から再計測しました。エッジキャッシュは劇的に効きましたが、モバイルは横ばいです。原因は特定できています。</p>
+  <p class="sub">2026-09-12 05:03 に米国シカゴから再計測しました。結論から言うと、<strong>速度に効く3つの課題はまだ手つかず</strong>です。この先は「何を・どこで・どうクリックするか」まで分解して書いています。</p>
   <div class="provenance">
-    <span>再計測 <b>2026-09-12</b></span>
-    <span>前回 <b>2026-09-11</b></span>
-    <span>計測地点 <b>Washington DC (IAD)</b></span>
+    <span>今回 <b>09-12 05:03</b></span>
+    <span>計測地点 <b>Chicago, Illinois (ORD)</b></span>
     <span>ツール <b>Lighthouse 12</b>／各3回の中央値</span>
   </div>
 </header>
@@ -207,186 +250,272 @@ footer a{color:var(--accent)}
 <section>
   <div class="sec-head">
     <span class="sec-num">01</span>
-    <h2>結論</h2>
-  </div>
-  <div class="verdict">
-    <div class="vcard ok">
-      <div class="lab">施策1 の効果</div>
-      <div class="big">0.85<span style="font-size:18px">s</span> → 0.02<span style="font-size:18px">s</span></div>
-      <div class="cap">サーバー応答時間 (TTFB)。エッジキャッシュが効き、<strong>約42倍の高速化</strong>。デスクトップは 100/100 に到達しました。</div>
-    </div>
-    <div class="vcard crit">
-      <div class="lab">新たな最大のボトルネック</div>
-      <div class="big">460<span style="font-size:20px">KB</span></div>
-      <div class="cap">Google タグが <strong>3本に増加</strong>。モバイルの改善余地 1.52秒 はほぼこれが原因です。</div>
-    </div>
+    <h2>今回わかったこと</h2>
   </div>
   <div class="callout">
-    <div class="lab">要点</div>
-    <p>TTFB は狙いどおり消えましたが、<strong>モバイルの LCP は 2.42s → 2.50s とほぼ横ばい</strong>です。TTFB が減った分を、新たに増えた JavaScript が食い潰しました。次の一手は画像ではなく<strong>タグの整理</strong>です。</p>
+    <div class="lab">ひとことで</div>
+    <p>キャッシュ（施策1）は引き続き効いていて、サーバー応答は <strong>0.02秒</strong> のままです。ただし<strong>モバイルの表示速度は 2.42 → 2.50 → 2.54秒 とわずかに悪化方向</strong>で、実質は横ばいです。理由ははっきりしていて、<strong>重いもの（Googleタグ3本と画像2MB）が前回からひとつも減っていない</strong>からです。</p>
   </div>
+
+  <p>ヘッダーを比べると、今回検出できた変更は <code>vary: accept-encoding</code> が増えたことだけでした。これは圧縮の扱いとしては正しい設定ですが、<strong>表示速度には影響しません</strong>。それ以外に速度へ効く変更は、計測結果からは確認できませんでした。</p>
+
+  <pre class="ev">cf-cache-status: MISS → HIT    キャッシュは動作中（1回目でMISS、2回目からHIT）
+cache-control: max-age=14400   キャッシュの有効期間は4時間
+x-nginx-cache: EXPIRED         今回はちょうど期限切れの瞬間に当たりました
+<b>vary: User-Agent</b>               まだ残っています
+<b>vary: accept-encoding</b>          今回増えた分（速度への影響はなし）</pre>
+
+  <h3 style="font-size:14px;margin:26px 0 8px">3回の推移</h3>
+  <div class="tablewrap" style="margin-bottom:20px">
+  <table class="trend">
+    <thead><tr><th>モバイル</th><th class="n">09-11</th><th class="n">09-12 04:21</th><th class="n">09-12 05:03</th></tr></thead>
+    <tbody>
+      <tr><td>スコア</td><td class="n">96</td><td class="n">95</td><td class="n cur">94</td></tr>
+      <tr><td>LCP（表示完了）</td><td class="n">2.42s</td><td class="n">2.50s</td><td class="n cur">2.54s</td></tr>
+      <tr><td>TTFB（サーバー応答）</td><td class="n">0.82s</td><td class="n">0.02s</td><td class="n cur big-ok">0.02s</td></tr>
+      <tr><td>ページ容量</td><td class="n">1,249KB</td><td class="n">1,180KB</td><td class="n cur">1,417KB</td></tr>
+      <tr><td>JavaScript</td><td class="n">354KB</td><td class="n">522KB</td><td class="n cur flat">522KB</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="tablewrap">
+  <table class="trend">
+    <thead><tr><th>デスクトップ</th><th class="n">09-11</th><th class="n">09-12 04:21</th><th class="n">09-12 05:03</th></tr></thead>
+    <tbody>
+      <tr><td>スコア</td><td class="n">99</td><td class="n">100</td><td class="n cur">99</td></tr>
+      <tr><td>LCP（表示完了）</td><td class="n">0.79s</td><td class="n">0.73s</td><td class="n cur big-ok">0.76s</td></tr>
+      <tr><td>TTFB（サーバー応答）</td><td class="n">0.85s</td><td class="n">0.02s</td><td class="n cur big-ok">0.02s</td></tr>
+      <tr><td>ページ容量</td><td class="n">2,282KB</td><td class="n">2,995KB</td><td class="n cur flat">2,995KB</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p style="margin-top:16px"><strong>デスクトップは目標達成済みです（0.76秒）。</strong>以降はすべて「モバイルを1秒台にする」ための作業です。</p>
 </section>
 
 <section>
   <div class="sec-head">
     <span class="sec-num">02</span>
-    <h2>前回との比較</h2>
-    <span class="note">数値はすべて小さいほど良い</span>
+    <h2>用語のミニ解説</h2>
+    <span class="note">この4つだけ覚えれば読めます</span>
   </div>
-
-  <h3 style="font-size:14px;margin-bottom:8px">モバイル（低速4G · CPU 4倍遅延）　スコア 96 → <strong>95</strong></h3>
-  <div class="tablewrap" style="margin-bottom:26px">
-  <table class="cmp">
-    <thead><tr><th>指標</th><th class="n">09-11</th><th class="n">09-12</th><th>変化</th></tr></thead>
-    <tbody>
-      <tr class="hl"><td class="m">TTFB</td><td class="n">0.82s</td><td class="n">0.02s</td><td><span class="delta up">−0.80s　大幅改善</span></td></tr>
-      <tr class="hl"><td class="m">SI</td><td class="n">2.44s</td><td class="n">2.03s</td><td><span class="delta up">−0.41s</span></td></tr>
-      <tr><td class="m">FCP</td><td class="n">2.07s</td><td class="n">2.01s</td><td><span class="delta up">−0.06s</span></td></tr>
-      <tr class="wl"><td class="m">LCP</td><td class="n">2.42s</td><td class="n">2.50s</td><td><span class="delta down">+0.08s　横ばい</span></td></tr>
-      <tr class="wl"><td class="m">TBT</td><td class="n">0.08s</td><td class="n">0.12s</td><td><span class="delta down">+0.04s</span></td></tr>
-      <tr class="wl"><td class="m">TTI</td><td class="n">6.57s</td><td class="n">7.31s</td><td><span class="delta down">+0.74s</span></td></tr>
-      <tr><td class="m">CLS</td><td class="n">0.000</td><td class="n">0.000</td><td><span class="delta flat">変化なし</span></td></tr>
-      <tr class="hl"><td class="m">容量</td><td class="n">1,249KB</td><td class="n">1,180KB</td><td><span class="delta up">−69KB</span></td></tr>
-    </tbody>
-  </table>
-  </div>
-
-  <h3 style="font-size:14px;margin-bottom:8px">デスクトップ　スコア 99 → <strong>100</strong></h3>
-  <div class="tablewrap">
-  <table class="cmp">
-    <thead><tr><th>指標</th><th class="n">09-11</th><th class="n">09-12</th><th>変化</th></tr></thead>
-    <tbody>
-      <tr class="hl"><td class="m">TTFB</td><td class="n">0.85s</td><td class="n">0.02s</td><td><span class="delta up">−0.83s　大幅改善</span></td></tr>
-      <tr class="hl"><td class="m">SI</td><td class="n">1.11s</td><td class="n">0.54s</td><td><span class="delta up">−0.57s</span></td></tr>
-      <tr class="hl"><td class="m">LCP</td><td class="n">0.79s</td><td class="n">0.73s</td><td><span class="delta up">−0.06s</span></td></tr>
-      <tr><td class="m">FCP</td><td class="n">0.57s</td><td class="n">0.53s</td><td><span class="delta up">−0.04s</span></td></tr>
-      <tr><td class="m">TTI</td><td class="n">0.79s</td><td class="n">0.73s</td><td><span class="delta up">−0.06s</span></td></tr>
-      <tr class="wl"><td class="m">容量</td><td class="n">2,282KB</td><td class="n">2,995KB</td><td><span class="delta down">+713KB</span></td></tr>
-    </tbody>
-  </table>
-  </div>
-
-  <div class="panels" style="margin-top:26px">
-    <div class="panel">
-      <div class="panel-head">
-        <h3>現在の実測値</h3>
-        <span class="cond-cond">上：モバイル ／ 下：デスクトップ</span>
-      </div>
-      <div class="panel-body">
-        <div class="axis"><span></span><div class="goal"><div class="goalline" style="left:12.5%"><span>目標 1.0s</span></div></div><span></span></div>
-        <div class="track-row"><span class="name">M TTFB</span><div class="track"><div class="fill" style="width:0.25%;min-width:3px"></div></div><span class="val">0.02s</span></div>
-        <div class="track-row"><span class="name">M FCP</span><div class="track"><div class="fill" style="width:25.1%"></div></div><span class="val">2.01s</span></div>
-        <div class="track-row"><span class="name">M LCP</span><div class="track"><div class="fill red" style="width:31.3%"></div></div><span class="val red">2.50s</span></div>
-        <div class="track-row"><span class="name">M SI</span><div class="track"><div class="fill" style="width:25.4%"></div></div><span class="val">2.03s</span></div>
-        <div class="track-row"><span class="name">M TTI</span><div class="track"><div class="fill red" style="width:91.4%"></div></div><span class="val red">7.31s</span></div>
-        <div style="height:10px"></div>
-        <div class="track-row"><span class="name">D TTFB</span><div class="track"><div class="fill" style="width:0.25%;min-width:3px"></div></div><span class="val">0.02s</span></div>
-        <div class="track-row"><span class="name">D FCP</span><div class="track"><div class="fill" style="width:6.6%"></div></div><span class="val">0.53s</span></div>
-        <div class="track-row"><span class="name">D LCP</span><div class="track"><div class="fill" style="width:9.1%"></div></div><span class="val">0.73s</span></div>
-        <div class="track-row"><span class="name">D SI</span><div class="track"><div class="fill" style="width:6.8%"></div></div><span class="val">0.54s</span></div>
-        <div class="track-row"><span class="name">D TTI</span><div class="track"><div class="fill" style="width:9.1%"></div></div><span class="val">0.73s</span></div>
-        <div class="axis"><span></span><div class="ticks"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8s</span></div><span></span></div>
-      </div>
-    </div>
-  </div>
+  <dl class="glossary">
+    <div class="gl"><dt>LCP</dt><dd>ページで<strong>一番大きい画像や見出しが表示されるまでの時間</strong>。訪問者が「表示された」と感じる瞬間。今の最重要指標です。</dd></div>
+    <div class="gl"><dt>TTFB</dt><dd>サーバーが<strong>最初の1文字を返すまでの時間</strong>。ここは 0.02秒 まで改善済みで、もう問題ありません。</dd></div>
+    <div class="gl"><dt>KB / MB</dt><dd>訪問者がダウンロードするデータ量。<strong>1,000KB = 1MB</strong>。少ないほど速く、スマホの通信量も減ります。</dd></div>
+    <div class="gl"><dt>キャッシュ</dt><dd>一度作ったページを<strong>コピーして近くに置いておく仕組み</strong>。Cloudflare が米国内にコピーを置いてくれています。</dd></div>
+  </dl>
 </section>
 
 <section>
   <div class="sec-head">
     <span class="sec-num">03</span>
-    <h2>施策の実施状況</h2>
-    <span class="note">ヘッダーとリクエスト内容から判定</span>
+    <h2>やること（この順番で）</h2>
+    <span class="note">上から順に、効果の大きい順</span>
   </div>
-  <div class="status">
-    <div class="st done"><span class="ic">✓</span><span class="tx"><strong>1. エッジキャッシュ</strong> — <code>cf-cache-status: HIT</code>、<code>cache-control: max-age=14400</code>。TTFB が実測 36〜56ms に。</span><span class="tag">完了</span></div>
-    <div class="st done"><span class="ic">✓</span><span class="tx"><strong>4. Rocket Loader 無効化</strong> — <code>rocket-loader.min.js</code> の読み込みが消え、スクリプトの <code>type</code> 書き換えもなくなりました。</span><span class="tag">完了</span></div>
-    <div class="st partial"><span class="ic">◐</span><span class="tx"><strong>2. 画像の軽量化</strong> — モバイル用 768px の JDM-TOUR バナーのみ 347KB → 110KB に。<strong>デスクトップ用 1024px の4枚は未処理</strong>（633/560/545/537KB のまま）。</span><span class="tag">一部のみ</span></div>
-    <div class="st todo"><span class="ic">—</span><span class="tx"><strong>3. メインビジュアルの優先読み込み</strong> — <code>&lt;img&gt;</code> に <code>fetchpriority="high"</code> はまだ付いていません。</span><span class="tag">未実施</span></div>
-    <div class="st todo"><span class="ic">—</span><span class="tx"><strong><code>vary: User-Agent</code> の除去</strong> — まだ残っています。キャッシュは効いていますが、User-Agent ごとに別エントリになるため hit 率を下げ続けます。</span><span class="tag">未実施</span></div>
-    <div class="st bad"><span class="ic">!</span><span class="tx"><strong>5. Google タグの重複</strong> — 2本から<strong>3本に増えました</strong>。</span><span class="tag">悪化</span></div>
+
+  <div class="step">
+    <div class="step-head">
+      <span class="step-no">STEP 1</span>
+      <h3>Googleタグを1本にまとめる</h3>
+      <span class="step-meta"><span class="chip gain">−1.67秒</span><span class="chip easy">コード編集なし</span></span>
+    </div>
+    <div class="step-body">
+      <div class="why">
+        <b>なぜ必要か：</b>今、同じアクセス解析のプログラムが<b>3本も読み込まれています</b>。合計 459KB で、これはページ内のJavaScript 522KB のほとんどを占めています。3本あっても計測結果が3倍正確になるわけではなく、<b>単純に無駄</b>です。Lighthouse はこれを直すだけで <b>1.67秒</b> 速くなると試算しています。
+      </div>
+      <pre class="ev">172KB  gtag/js?id=GT-TX9NK383            ← どこかに直接貼られている
+172KB  gtag/js?id=GT-TX9NK383&amp;cx=c...   ← GTM が読み込んでいる
+115KB  gtm.js?id=GTM-WFGD8X5Q            ← GTM 本体
+─────
+459KB  すべて同じ GT-TX9NK383 を計測している</pre>
+
+      <p style="font-size:13.5px;margin-bottom:10px"><strong>まず「どこに貼られているか」を探します。</strong></p>
+      <ol class="howto">
+        <li>Chrome で <span class="path">https://81drive.com/</span> を開きます。</li>
+        <li>ページ上で<strong>右クリック</strong>→<strong>「ページのソースを表示」</strong>を選びます。英数字がびっしり並んだ画面が出ますが、読む必要はありません。</li>
+        <li><strong>Ctrl + F</strong>（Macは <strong>⌘ + F</strong>）を押して、検索欄に <span class="path">GT-TX9NK383</span> と入力します。</li>
+        <li>検索欄の横に<strong>ヒット件数</strong>が出ます。これが <strong>2件以上</strong>なら、GTM とは別に直接貼られたタグがあります。</li>
+      </ol>
+
+      <p style="font-size:13.5px;margin:18px 0 10px"><strong>次に、その直接貼られたタグを消します。</strong>心当たりのある場所を上から順に確認してください。</p>
+      <ol class="howto">
+        <li><strong>SWELLの設定を見る</strong> — WordPress管理画面の <span class="path">SWELL設定 → 一般</span> を開き、「Google Analytics」「Googleタグ」「head内に出力するコード」といった入力欄に <span class="path">GT-TX9NK383</span> や <span class="path">gtag</span> が入っていないか確認します。入っていたら<strong>その欄だけを空にして保存</strong>します。</li>
+        <li><strong>プラグインを見る</strong> — <span class="path">プラグイン → インストール済みプラグイン</span> で、「Site Kit by Google」「GA Google Analytics」など解析系プラグインが有効になっていないか確認します。GTMを使うなら、これらの<strong>Analytics連携をオフ</strong>にします。</li>
+        <li><strong>カスタマイザーを見る</strong> — <span class="path">外観 → カスタマイズ → 高度な設定</span>（またはCSS/HTML追加欄）に貼られていないか確認します。</li>
+        <li>消したら<strong>保存</strong>し、Cloudflare のキャッシュを消します（STEP 5 の手順）。その後、上の検索をもう一度行ってヒット件数が減ったか確認します。</li>
+      </ol>
+
+      <div class="warn">
+        <div class="lab">判断に迷ったら</div>
+        <strong>GTM（タグマネージャー）を広告タグなどにも使っていますか？</strong><br>
+        ・<strong>使っている</strong> → GTM を残し、直接貼られた <code>gtag</code> を消す。（−172KB）<br>
+        ・<strong>使っていない／わからない</strong> → GTM のほうを外し、<code>gtag</code> だけ残すのが最軽量です。（−287KB）<br>
+        どちらにしても<strong>計測は止まりません</strong>。作業後に Google アナリティクスの「リアルタイム」で自分のアクセスが表示されるか確認してください。
+      </div>
+
+      <div class="check">
+        <div class="lab">できたらこうなる</div>
+        ソースを検索したときの <code>GT-TX9NK383</code> のヒットが減り、次回の計測で JavaScript が <strong>522KB → 250〜350KB</strong> に下がります。
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-head">
+      <span class="step-no">STEP 2</span>
+      <h3>画像をWebP形式に変換する</h3>
+      <span class="step-meta"><span class="chip gain">−2.0MB</span><span class="chip easy">コード編集なし</span></span>
+    </div>
+    <div class="step-body">
+      <div class="why">
+        <b>なぜ必要か：</b>バナー4枚が <b>PNG形式</b>のまま置かれています。PNG はイラストや透過画像用の形式で、<b>写真には向いていません</b>。WebP という新しい形式に変えると、見た目はほぼ同じまま<b>容量が10分の1程度</b>になります。今この4枚だけで 2.2MB あり、ページ全体の8割を占めています。
+      </div>
+      <pre class="ev">633KB  DAIKOKU-TOUR バナー-1024x576.png
+560KB  JDM-TOUR バナー-3-1024x576.png
+545KB  image-1-1024x576.png
+537KB  image-1024x576.png
+─────
+2,275KB  → WebP なら合計 250KB 程度</pre>
+
+      <p style="font-size:13.5px;margin-bottom:10px">すでに <strong>EWWW Image Optimizer</strong> というプラグインが入っているので、設定を変えるだけで実行できます。</p>
+      <ol class="howto">
+        <li>WordPress管理画面の <span class="path">設定 → EWWW Image Optimizer</span> を開きます。</li>
+        <li><strong>WebP変換をオンにします。</strong>「Easy Mode」画面なら <strong>「WebP変換」</strong>のスイッチをオン。「Advanced（詳細）」画面なら <strong>WebPタブ</strong>の「JPG/PNG から WebP」にチェックを入れます。</li>
+        <li><strong>配信方法を選びます。</strong>同じWebP設定欄の中に配信方法の選択があります。このサイトは Cloudflare 経由なので <strong>「JS WebP Rewriting」または「&lt;picture&gt; WebP Rewriting」</strong>を選んでください。（.htaccess方式はCloudflareと相性が悪く、うまく届かないことがあります）</li>
+        <li><strong>変更を保存</strong>します。</li>
+        <li><strong>既存の画像を一括変換します。</strong><span class="path">メディア → 一括最適化</span> を開き、<strong>「最適化されていない画像をスキャンする」</strong>→ 見つかったら <strong>「最適化を開始」</strong>を押します。画像の枚数によっては数分かかります。<strong>画面を閉じずに</strong>終わるまで待ってください。</li>
+        <li>終わったら Cloudflare のキャッシュを消します（STEP 5 の手順）。</li>
+      </ol>
+
+      <div class="warn">
+        <div class="lab">念のため</div>
+        一括最適化は元画像を置き換える処理です。作業前に<strong>バックアップ</strong>を取っておくと安心です。EWWW には元画像を保管する設定（Backup originals）もあるので、オンにしておくと元に戻せます。
+      </div>
+
+      <div class="check">
+        <div class="lab">できたらこうなる</div>
+        次回の計測で、デスクトップのページ容量が <strong>2,995KB → 800KB前後</strong>に下がります。スマホの通信量も大きく減ります。
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-head">
+      <span class="step-no">STEP 3</span>
+      <h3>トップの大きな画像を「最優先」で読み込ませる</h3>
+      <span class="step-meta"><span class="chip gain">表示の安定化</span><span class="chip easy">設定で対応可</span></span>
+    </div>
+    <div class="step-body">
+      <div class="why">
+        <b>なぜ必要か：</b>トップページの一番大きい画像（メインビジュアル）が、<b>「後回しでいい画像」として扱われています</b>。そのため読み込みが遅れ、計測3回のうち1回は表示に <b>7.38秒</b> かかりました（他2回は2.5秒）。この<b>ばらつき</b>がまさにその証拠です。「最初に見える画像は後回しにしない」と指定すれば安定します。
+      </div>
+      <p style="font-size:13.5px;margin-bottom:10px">EWWW の遅延読み込み機能から、この画像だけを<strong>除外</strong>するのが一番安全な方法です。</p>
+      <ol class="howto">
+        <li><span class="path">設定 → EWWW Image Optimizer</span> を開きます。</li>
+        <li><strong>「Lazy Load」（遅延読み込み）</strong>の設定欄を探します。「Easy Mode」にある場合と、「Advanced」の中にある場合があります。</li>
+        <li>その近くにある<strong>「除外するもの」「Exclude」</strong>という入力欄に、次の1行を貼り付けます。<br><span class="path">p-mainVisual__img</span></li>
+        <li><strong>保存</strong>します。</li>
+        <li>SWELL側にも遅延読み込み設定があります。<span class="path">SWELL設定 → 高速化</span> を開き、<strong>「遅延読み込み」</strong>の項目に除外設定があれば同じ文字列を追加してください。</li>
+      </ol>
+
+      <div class="warn">
+        <div class="lab">補足</div>
+        遅延読み込みのプログラム（lazysizes）が <strong>EWWW と SWELL で2本</strong>読み込まれています。どちらか片方で十分なので、<span class="path">SWELL設定 → 高速化</span> で遅延読み込みをオフにして EWWW 側に任せると、さらに軽くなります。<strong>ただし STEP 1・2 を終えてから</strong>、1つずつ試してください。
+      </div>
+
+      <div class="check">
+        <div class="lab">できたらこうなる</div>
+        計測3回の LCP のばらつき（7.38s / 2.54s / 2.53s）が揃い、<strong>毎回ほぼ同じ数値</strong>になります。
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-head">
+      <span class="step-no">STEP 4</span>
+      <h3>外部サーバーへの接続を前倒しする（preconnect）</h3>
+      <span class="step-meta"><span class="chip gain">−0.33秒</span><span class="chip easy">1行追加</span></span>
+    </div>
+    <div class="step-body">
+      <div class="why">
+        <b>なぜ必要か：</b>Googleや口コミサービスなど<b>外部のサーバー</b>から読み込むファイルがあります。ブラウザは「必要だとわかった時点」で接続を始めるため、その分だけ待ち時間が生まれます。<b>「あとでこのサーバーを使うよ」と先に伝えておく</b>と、その待ち時間が消えます。Lighthouse の試算で 0.33秒 の短縮です。
+      </div>
+      <ol class="howto">
+        <li><span class="path">SWELL設定 → 一般</span> の中にある<strong>「&lt;head&gt;内に出力するコード」</strong>の入力欄を開きます。（STEP 1 で確認した欄と同じ場所です）</li>
+        <li>次の3行を<strong>そのまま貼り付けて</strong>保存します。</li>
+      </ol>
+      <pre class="ev">&lt;link rel="preconnect" href="https://www.googletagmanager.com" crossorigin&gt;
+&lt;link rel="preconnect" href="https://cdn.trustindex.io" crossorigin&gt;
+&lt;link rel="preconnect" href="https://static.cloudflareinsights.com" crossorigin&gt;</pre>
+      <div class="warn">
+        <div class="lab">順番に注意</div>
+        <strong>STEP 1 を先に終わらせてください。</strong>STEP 1 で GTM を外した場合、1行目は不要になります。
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-head">
+      <span class="step-no">STEP 5</span>
+      <h3>Cloudflareのキャッシュを消す（毎回の仕上げ）</h3>
+      <span class="step-meta"><span class="chip easy">30秒</span></span>
+    </div>
+    <div class="step-body">
+      <div class="why">
+        <b>なぜ必要か：</b>Cloudflare は古いページのコピーを持っています。設定を変えても<b>コピーが残っていると変更が反映されません</b>。「直したのに変わらない」の原因はほぼこれです。STEP 1〜4 のあと毎回実行してください。
+      </div>
+      <ol class="howto">
+        <li><span class="path">dash.cloudflare.com</span> にログインします。</li>
+        <li>サイト一覧から <strong>81drive.com</strong> を選びます。</li>
+        <li>左メニューの <strong>「Caching」→「Configuration」</strong>を開きます。</li>
+        <li><strong>「Purge Everything」</strong>（すべて削除）ボタンを押し、確認ダイアログでもう一度押します。</li>
+        <li>1〜2分待ってから、スマホやシークレットウィンドウでサイトを開いて確認します。</li>
+      </ol>
+      <div class="warn">
+        <div class="lab">ついでに直せること</div>
+        現在キャッシュの有効期間が <strong>4時間</strong>（<code>max-age=14400</code>）です。今回の計測はちょうど期限切れの瞬間に当たりました（<code>cf-cache-status: MISS</code>）。4時間ごとに1人目の訪問者だけが遅くなる状態なので、<span class="path">Caching → Configuration → Browser Cache TTL</span> や Cache Rule の Edge TTL を<strong>1日以上</strong>に伸ばすと安定します。更新時は上の Purge を実行すれば即座に反映されます。
+      </div>
+    </div>
   </div>
 </section>
 
 <section>
   <div class="sec-head">
     <span class="sec-num">04</span>
-    <h2>今すぐやるべきこと</h2>
+    <h2>作業後の見込み</h2>
+    <span class="note">推定値</span>
   </div>
-
-  <div class="act">
-    <div class="act-head"><span class="rank">1</span><h3>Google タグの重複を解消する</h3><span class="gain">−1.52秒 / −345KB</span></div>
-    <div class="act-body">
-      <p><span class="effort">タグ設定</span>現在、同じ計測 ID のタグが3本読み込まれています。</p>
-      <pre class="ev">173KB  gtag/js?id=GT-TX9NK383
-172KB  gtag/js?id=GT-TX9NK383<b>&amp;cx=c&amp;gtm=4e6992</b>   ← 今回増えた分
-115KB  gtm.js?id=GTM-WFGD8X5Q
-─────
-460KB  同一 ID を3重に計測</pre>
-      <p>2本目は <strong>GTM 経由で読み込まれた GA4 タグ</strong>で、1本目のテーマ／プラグイン側の直接埋め込みと重複しています。<strong>GTM に一本化し、テーマやプラグインの直接埋め込みを削除してください。</strong></p>
-      <p>これは現在<strong>モバイルの最優先改善項目</strong>です。Lighthouse は「未使用の JavaScript の削減」で <strong>1.52秒</strong> の短縮を見込んでいます。サードパーティ JS はメインスレッドを 360ms 占有しており、TBT と TTI が悪化した直接の原因でもあります。</p>
-    </div>
+  <div class="tablewrap">
+  <table class="road">
+    <thead><tr><th>段階</th><th>内容</th><th class="n">モバイル LCP</th><th class="n">JavaScript</th><th class="n">ページ容量</th></tr></thead>
+    <tbody>
+      <tr><td class="now">現在</td><td>—</td><td class="n now">2.54s</td><td class="n">522KB</td><td class="n">2,995KB</td></tr>
+      <tr><td><strong>STEP 1 後</strong></td><td>タグを1本に</td><td class="n">約 1.3〜1.6s</td><td class="n">約 250KB</td><td class="n">約 2,700KB</td></tr>
+      <tr><td class="p2"><strong>STEP 2〜4 後</strong></td><td>画像WebP＋優先読み込み＋preconnect</td><td class="n p2">約 0.9〜1.2s</td><td class="n">約 250KB</td><td class="n p2">約 700KB</td></tr>
+    </tbody>
+  </table>
   </div>
-
-  <div class="act">
-    <div class="act-head"><span class="rank">2</span><h3>残り4枚の PNG バナーを WebP 化する</h3><span class="gain">−2.0MB</span></div>
-    <div class="act-body">
-      <p><span class="effort">設定のみ</span>モバイル用の1枚は軽量化されましたが、デスクトップ用の 1024px 版が手つかずです。</p>
-      <pre class="ev">633KB  DAIKOKU-TOUR バナー-1024x576.png
-560KB  JDM-TOUR バナー-3-1024x576.png
-545KB  image-1-1024x576.png
-537KB  image-1024x576.png</pre>
-      <p>デスクトップの総容量が 2,282KB → <strong>2,995KB に増えて</strong>おり、「巨大なネットワークペイロード」として警告が出ています。EWWW の WebP 変換を<strong>全サイズに対して</strong>再実行してください。</p>
-    </div>
-  </div>
-
-  <div class="act">
-    <div class="act-head"><span class="rank">3</span><h3>メインビジュアルを優先読み込みにする</h3><span class="gain b">LCP 改善</span></div>
-    <div class="act-body">
-      <p><span class="effort">テーマ編集</span>前回から変わっていません。モバイルの初回計測では LCP が <strong>6,210ms</strong> に振れており、この画像の取得タイミングが不安定です。<code>fetchpriority="high"</code> の付与と遅延読み込みからの除外は、TTFB が解消された今こそ効果が出ます。</p>
-    </div>
-  </div>
-
-  <div class="act">
-    <div class="act-head"><span class="rank">4</span><h3><code>vary: User-Agent</code> を外す</h3><span class="gain b">hit 率向上</span></div>
-    <div class="act-body">
-      <p><span class="effort">設定のみ</span>キャッシュ自体は効き始めましたが、このヘッダーが残っている限り User-Agent 文字列ごとに別エントリが作られます。今回の計測では <code>age: 3017</code>（約50分前のキャッシュ）に当たりましたが、実ユーザーの端末が多様なほど MISS が増えます。</p>
-    </div>
-  </div>
+  <p style="margin-top:18px"><strong>STEP 1 だけで「1秒台」に到達する見込みです。</strong>しかもコード編集は不要で、管理画面の設定を消すだけです。まずここだけ実施して再計測するのが、一番確実で安全な進め方です。</p>
 </section>
 
 <section>
   <div class="sec-head">
     <span class="sec-num">05</span>
-    <h2>目標までの残り</h2>
-    <span class="note">推定値</span>
+    <h2>終わったら再計測</h2>
   </div>
-  <div class="tablewrap">
-  <table class="road">
-    <thead><tr><th>段階</th><th>内容</th><th class="n">モバイル LCP</th><th class="n">デスクトップ LCP</th></tr></thead>
-    <tbody>
-      <tr><td>09-11</td><td>着手前</td><td class="n">2.42s</td><td class="n">0.79s</td></tr>
-      <tr><td class="now">09-12</td><td>エッジキャッシュ＋Rocket Loader 対応済</td><td class="n now">2.50s</td><td class="n p2">0.73s</td></tr>
-      <tr><td><strong>次</strong></td><td>タグ重複の解消（施策1）</td><td class="n">約 1.3〜1.6s</td><td class="n">約 0.6s</td></tr>
-      <tr><td class="p2"><strong>その次</strong></td><td>画像 WebP 化＋LCP 優先読み込み</td><td class="n p2">約 0.9〜1.2s</td><td class="n p2">約 0.4s</td></tr>
-    </tbody>
-  </table>
-  </div>
-  <p style="margin-top:18px"><strong>デスクトップは目標達成済みです（LCP 0.73秒 / スコア 100）。</strong>モバイルの「1秒台」は、タグの重複を解消するだけで到達する見込みです。画像の WebP 化まで終えれば1秒前後まで見えてきます。</p>
-</section>
-
-<section>
-  <div class="sec-head">
-    <span class="sec-num">06</span>
-    <h2>補足</h2>
-  </div>
-  <p><strong>TTI の悪化について：</strong>モバイルの TTI が 6.57s → 7.31s と悪化していますが、これは Rocket Loader を外したことで JS が本来のタイミングで実行されるようになった影響と、タグが1本増えた影響の合算です。なお <strong>TTI は Lighthouse 12 のスコア計算には含まれていません</strong>（FCP・SI・LCP・TBT・CLS で算出）。体感速度により近い SI は 2.44s → 2.03s と改善しているため、全体としては前進しています。タグ重複を解消すれば TTI も戻ります。</p>
-  <p><strong>計測のばらつき：</strong>モバイル LCP の3回の値は 6.21s / 2.48s / 2.50s で、初回のみ大きく外れています。中央値の 2.50s を採用していますが、この振れ幅自体がメインビジュアルの優先読み込み（施策3）が未実施であることを示しています。</p>
-  <p>計測は <code>Actions → Performance audit (US)</code> からいつでも再実行できます。変更を加えたら再度実行してください。</p>
+  <ol class="howto">
+    <li>GitHub のリポジトリ <span class="path">jdmpride1-debug/81drive</span> を開きます。</li>
+    <li>上部タブの <strong>「Actions」</strong>をクリックします。</li>
+    <li>左側の <strong>「Performance audit (US)」</strong>を選びます。</li>
+    <li>右側の <strong>「Run workflow」</strong>ボタン →緑の <strong>「Run workflow」</strong>を押します。</li>
+    <li>5分ほどで完了します。実行結果を開くと、下の方に数値の表が出ます。</li>
+  </ol>
+  <p style="margin-top:16px"><strong>コツ：</strong>STEP を全部まとめてやるより、<strong>1つ終えるごとに再計測</strong>してください。どの作業がどれだけ効いたかがはっきりし、もし数値が悪化しても原因がすぐ特定できます。毎週月曜にも自動で計測されます。</p>
 </section>
 
 <footer>
-  <p>+81DRIVE（JDM PRIDE株式会社）／ WordPress + SWELL 2.12.0 ／ Cloudflare<br>
-  再計測 2026-09-12 · Lighthouse 12 · 米国 Washington DC (IAD) エッジ · 前回比較は 2026-09-11 の計測</p>
+  <p>+81DRIVE（JDM PRIDE株式会社）／ WordPress + SWELL 2.12.0 ／ Cloudflare ／ EWWW Image Optimizer<br>
+  計測 2026-09-12 05:03 · Lighthouse 12 · 米国 Chicago (ORD) エッジ · モバイル/デスクトップ各3回の中央値</p>
 </footer>
 
 </div>
