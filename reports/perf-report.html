@@ -276,17 +276,25 @@ ol.howto strong{color:var(--ink)}
     <h2>原因は確定しました</h2>
     <span class="note">07:15 のレスポンスヘッダー</span>
   </div>
-  <pre class="ev"><b>age: 8016</b>                                    ← 2時間13分前のコピー
-<b>last-modified: Sat, 12 Sep 2026 05:02:22 GMT</b>  ← 画像入れ替え<b>前</b>の版
-cache-control: max-age=14400                     ← 4時間保持される
-<b>cf-cache-status: HIT</b>                             ← キャッシュから配信
-cf-ray: a39d1fc81a1161ad-ORD</pre>
-  <p><strong><code>age: 8016</code> は「このコピーは 8,016秒（2時間13分）前に保存された」という意味です。</strong>キャッシュを削除していれば、ここは <code>0</code> に戻ります。</p>
-  <p>さらに <code>last-modified</code> は <strong>05:02</strong>。画像の入れ替えが反映されたのを最初に確認したのが 06:23 なので、<strong>配信されているのは入れ替え前のページ</strong>で確定です。</p>
+  <pre class="ev">07:15 の計測        07:27 の計測
+<b>age: 8016</b>          <b>age: 14294</b>        ← 3時間58分前のコピー
+last-modified      last-modified
+ 05:02:22           <b>03:29:37</b>          ← さらに古い版
+cf-cache-status: HIT   cf-cache-status: HIT
+cf-ray: ...-ORD        cf-ray: ...-IAD     ← 別拠点＝別のコピー
+<b>x-nginx-cache: MISS</b>                       ← サーバー側は正常</pre>
+  <p><strong><code>age</code> は「このコピーが保存されてから何秒経ったか」です。</strong>キャッシュを削除していれば <code>0</code> に戻ります。2回の計測で 8,016秒 と 14,294秒、どちらも<strong>設定変更より前</strong>のコピーでした。</p>
+  <p><code>x-nginx-cache: MISS</code> なので、<strong>サーバー側のキャッシュは原因ではありません</strong>。Cloudflare の1点だけです。拠点（cf-ray の末尾 ORD / IAD など）ごとに別のコピーを持つため、計測のたびに違う古さのページが返ってきます。</p>
   <div class="callout">
-    <div class="lab">結論</div>
-    <p><strong>Cloudflare のキャッシュ削除（Purge Everything）が実行されていません。</strong>サーバー側の問題でも、ページ更新の失敗でもありません。削除すれば即座に解決します。</p>
+    <div class="lab">結論：これを消すまで計測できません</div>
+    <p><strong>Cloudflare のキャッシュ削除が実行されていません。</strong>そのため、画像の入れ替えも、SWELL のキャッシュ設定変更も、まだ一度も計測に反映されていません。<strong>失敗したのではなく、変更後のページをまだ見られていない</strong>という状態です。</p>
   </div>
+  <h3 style="font-size:14px;margin:24px 0 8px">2つの方法があります</h3>
+  <ol class="howto">
+    <li><strong>Purge Everything（本命）</strong> — <span class="path">dash.cloudflare.com</span> → 81drive.com → 左メニュー <strong>Caching</strong> → <strong>Configuration</strong> → <strong>Purge Everything</strong> → 確認ダイアログでもう一度クリック。</li>
+    <li><strong>Development Mode（すぐ試したい場合）</strong> — 同じ <strong>Caching</strong> メニュー内にあるスイッチです。オンにすると<strong>3時間だけキャッシュを完全に無効化</strong>し、常に最新のページが配信されます。検証が終わったらオフに戻してください。<br><span class="path">※ オンの間は表示が遅くなります（TTFB が 0.02秒 → 0.6秒 程度に戻ります）</span></li>
+  </ol>
+  <p style="font-size:13.5px"><strong>おすすめは 2 → 1 の順です。</strong>Development Mode で変更が正しく反映されているか確認し、問題なければオフに戻して Purge Everything を実行します。</p>
   <p>新旧が入れ替わって見えたのは、<strong>Cloudflare が世界中の拠点ごとに独立したキャッシュを持つ</strong>ためです。入れ替え後に新しく取得した拠点は新しいページを、05:02 の版を保持したままの拠点は古いページを返します。<code>vary: User-Agent</code> がこれをさらに分割し、同じ拠点でもパソコンとスマホで別々のコピーになります。</p>
 
   <h3 style="font-size:14px;margin:26px 0 8px">追加で見つかった旧PNG</h3>
