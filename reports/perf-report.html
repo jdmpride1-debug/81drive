@@ -347,12 +347,34 @@ x-nginx-cache: EXPIRED         今回はちょうど期限切れの瞬間に当�
       <div class="why">
         <b>なぜ最優先か：</b>タグの件が小さくなった結果、<b>画像が残る課題のほぼ全部</b>になりました。デスクトップのページ容量 2,823KB のうち <b>2,380KB（84%）が画像</b>です。しかもその大半がバナー4枚で、すべて<b>写真をPNG形式で保存したもの</b>です。PNGはイラストや透過画像用の形式で、写真に使うと容量が数倍〜十数倍に膨れます。
       </div>
-      <pre class="ev">633KB  DAIKOKU-TOUR バナー-1024x576.png
-560KB  JDM-TOUR バナー-3-1024x576.png
-545KB  image-1-1024x576.png
-537KB  image-1024x576.png
-─────
-2,275KB  この4枚だけでページ全体の8割</pre>
+      <h3 style="font-size:14px;margin:20px 0 8px">対象画像の全リスト（実測）</h3>
+      <div class="tablewrap" style="margin-bottom:14px">
+      <table class="cmp">
+        <thead><tr><th>ファイル</th><th class="n">現在</th><th class="n">大きすぎる分</th><th class="n">WebP化で減る分</th><th>リサイズ</th></tr></thead>
+        <tbody>
+          <tr class="wl"><td><code>DAIKOKU-TOUR バナー-1024x576.png</code></td><td class="n">633KB</td><td class="n">539KB</td><td class="n">556KB</td><td>必要</td></tr>
+          <tr class="wl"><td><code>JDM-TOUR バナー-3-1024x576.png</code></td><td class="n">560KB</td><td class="n">477KB</td><td class="n">494KB</td><td>必要</td></tr>
+          <tr class="wl"><td><code>image-1-1024x576.png</code></td><td class="n">545KB</td><td class="n">477KB</td><td class="n">497KB</td><td>必要</td></tr>
+          <tr class="wl"><td><code>image-1024x576.png</code></td><td class="n">537KB</td><td class="n">470KB</td><td class="n">491KB</td><td>必要</td></tr>
+          <tr><td><code>名称未設定のデザイン-300x100.png</code></td><td class="n">31KB</td><td class="n">23KB</td><td class="n">25KB</td><td>軽微</td></tr>
+          <tr><td><code>メインビジュアル用.jpeg</code></td><td class="n">75KB</td><td class="n">25KB</td><td class="n">33KB</td><td>不要</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p style="font-size:13.5px"><strong>上の4枚（合計2,275KB）がページ全体の約8割です。</strong>下2枚は後回しで構いません。</p>
+
+      <div class="warn">
+        <div class="lab">「何pxにすべきか」の答え</div>
+        Lighthouse の計算上は <strong>394px / 360px</strong> まで下げられますが、<strong>その数値は採用しないでください。</strong>iPhone や Mac などの高精細画面では、表示サイズの2倍の画像がないとぼやけます。<br><br>
+        <strong>推奨は幅 800px です。</strong>表示サイズ約400pxの2倍にあたり、高精細画面でも綺麗なまま、1024pxより軽くなります。
+      </div>
+
+      <div class="check">
+        <div class="lab">優先順位はこうです</div>
+        <strong>① 形式をWebPにする（最重要）</strong> — 4枚で約2,000KB削減。画質の劣化はほぼ無し。<br>
+        <strong>② ついでに幅800pxにする</strong> — さらに数十KB削減。①のついでに同じ画面でできます。<br><br>
+        リサイズ単独の効果は小さく、<strong>効いているのは形式のほう</strong>です。迷ったら①だけでも十分です。
+      </div>
 
       <p style="font-size:14px;margin:20px 0 8px"><strong>やり方は2通りあります。ルートAから始めるのをおすすめします。</strong></p>
 
