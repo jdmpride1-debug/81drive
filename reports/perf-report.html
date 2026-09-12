@@ -237,11 +237,11 @@ ol.howto strong{color:var(--ink)}
 <div class="wrap">
 
 <header class="mast">
-  <div class="kicker">Performance Audit · 画像入れ替え後</div>
+  <div class="kicker">Performance Audit · 遅延読み込み設定後</div>
   <h1>+81DRIVE 表示速度診断</h1>
-  <p class="sub">画像の入れ替えを反映して再計測しました。<strong>ページ容量が71%減り、デスクトップは100点・0.70秒に到達</strong>しています。残るのはモバイルだけで、原因も特定済みです。</p>
+  <p class="sub">Lazy Load の除外設定を反映して再計測しました。<strong>モバイルは改善しましたが、デスクトップに古いキャッシュが配信される問題</strong>を検出しました。先にこれを解消する必要があります。</p>
   <div class="provenance">
-    <span>今回 <b>09-12 06:23</b></span>
+    <span>今回 <b>09-12 06:57</b></span>
     <span>計測地点 <b>米国リージョン</b></span>
     <span>ツール <b>Lighthouse 12</b>／各3回の中央値</span>
   </div>
@@ -254,60 +254,68 @@ ol.howto strong{color:var(--ink)}
   </div>
   <div class="verdict">
     <div class="vcard ok">
-      <div class="lab">画像の入れ替え</div>
-      <div class="big">2,380 → 420<span style="font-size:18px">KB</span></div>
-      <div class="cap">画像だけで <strong>1,960KB 削減</strong>。ページ全体では 2,995KB → <strong>863KB（−71%）</strong>になりました。</div>
+      <div class="lab">モバイル</div>
+      <div class="big">824 → 584<span style="font-size:18px">KB</span></div>
+      <div class="cap">さらに <strong>240KB 削減</strong>。TTI も 6.04秒 → <strong>5.32秒</strong>、スコアは 94 → <strong>95</strong> に改善しました。</div>
     </div>
-    <div class="vcard ok">
-      <div class="lab">デスクトップ</div>
-      <div class="big">100<span style="font-size:20px">/100</span></div>
-      <div class="cap">LCP <strong>0.70秒</strong>。これまでの計測で最速です。目標を大きく上回りました。</div>
+    <div class="vcard crit">
+      <div class="lab">デスクトップ（今回の数値は無効）</div>
+      <div class="big">PNG 4枚<span style="font-size:18px"> が復活</span></div>
+      <div class="cap">削除したはずの旧PNG（633/560/545/537KB）が配信されました。<strong>Cloudflare が古いHTMLを返しています。</strong></div>
     </div>
   </div>
   <div class="callout">
-    <div class="lab">残っている課題</div>
-    <p><strong>モバイルの LCP は 2.54 → 2.53秒 とほぼ変わりませんでした。</strong>これは失敗ではありません。入れ替えたバナーは<strong>画面を下にスクロールした先にある</strong>ため、「最初に見える一番大きい要素」＝LCP の対象ではないからです。モバイルのLCPを縮めるのは、次の <strong>STEP 3（メインビジュアルの優先読み込み）</strong>です。</p>
+    <div class="lab">先にやること</div>
+    <p><strong>Cloudflare のキャッシュを削除してください（Purge Everything）。</strong>デスクトップ用のキャッシュだけが画像入れ替え前の状態で止まっており、このままでは正しい計測ができません。実際の訪問者にも古いページが表示されている可能性があります。</p>
   </div>
 </section>
 
 <section>
   <div class="sec-head">
     <span class="sec-num">02</span>
-    <h2>入れ替えの効果</h2>
+    <h2>なぜデスクトップだけ古いのか</h2>
   </div>
-  <pre class="ev">【入れ替え前】PNG 4枚                    【入れ替え後】JPG に変更
-633KB  DAIKOKU-TOUR バナー.png          101KB  JDM-TOUR バナー-2-1.jpg
-560KB  JDM-TOUR バナー-3.png             79KB  SKYLINE-ER34-TURBO-Silver.jpg
-545KB  image-1.png                       75KB  NISSAN-GT-R-R34-V-Spec.jpg
-537KB  image.png                         59KB  JDM-TOUR バナー-5.jpg
-─────                                 ─────
-2,275KB                                  314KB   <b>−1,961KB（−86%）</b></pre>
-  <p>PNG から JPG に変えたことで、狙いどおり容量が約7分の1になりました。<strong>この作業は完了です。</strong></p>
+  <p>同じ1回の計測の中で、モバイルとデスクトップで<strong>配信されている内容が違いました</strong>。</p>
+  <pre class="ev">モバイル（正しい・入れ替え後）      デスクトップ（古い・入れ替え前）
+ 75KB  JDM-TOUR バナー-5.jpg       633KB  DAIKOKU-TOUR バナー.png
+ 37KB  メインビジュアル用.jpeg       560KB  JDM-TOUR バナー-3.png
+ 31KB  名称未設定のデザイン.png       545KB  image-1.png
+─────                            537KB  image.png
+142KB  合計                      ─────
+                                 2,380KB  合計</pre>
+  <p>原因は、以前から指摘している <code>vary: User-Agent</code> と、キャッシュ期間 <code>max-age=14400</code>（4時間）の組み合わせです。</p>
+  <ul style="color:var(--ink-2);max-width:70ch">
+    <li><code>vary: User-Agent</code> があると、Cloudflare は<strong>ブラウザの種類ごとに別々のコピー</strong>を保存します。</li>
+    <li>モバイル用のコピーは新しい内容に更新されましたが、<strong>デスクトップ用のコピーは入れ替え前のまま</strong>残っていました。</li>
+    <li>さらに Cloudflare は世界中の拠点ごとに独立してキャッシュを持つため、どの拠点に当たるかで内容が変わります（今回は LAX・ORD・IAD など回ごとに別拠点でした）。</li>
+  </ul>
+  <div class="callout">
+    <div class="lab">これは計測だけの問題ではありません</div>
+    <p><strong>実際の訪問者にも、古いページが表示されている可能性があります。</strong>パソコンから見ている人には入れ替え前のバナーが出ているかもしれません。シークレットウィンドウでパソコンから開いて確認してみてください。</p>
+  </div>
 
   <h3 style="font-size:14px;margin:26px 0 8px">推移</h3>
   <div class="tablewrap" style="margin-bottom:20px">
   <table class="trend">
-    <thead><tr><th>モバイル</th><th class="n">09-11</th><th class="n">05:48</th><th class="n">06:23</th></tr></thead>
+    <thead><tr><th>モバイル</th><th class="n">05:03</th><th class="n">06:23</th><th class="n">06:57</th></tr></thead>
     <tbody>
-      <tr><td>LCP（表示完了）</td><td class="n">2.42s</td><td class="n">2.72s</td><td class="n cur">2.53s</td></tr>
-      <tr><td>SI（体感速度）</td><td class="n">2.44s</td><td class="n">2.19s</td><td class="n cur big-ok">2.03s</td></tr>
-      <tr><td>TTI</td><td class="n">6.57s</td><td class="n">5.05s</td><td class="n cur">6.04s</td></tr>
-      <tr><td>TTFB</td><td class="n">0.82s</td><td class="n">0.03s</td><td class="n cur big-ok">0.03s</td></tr>
-      <tr><td>画像</td><td class="n">802KB</td><td class="n">802KB</td><td class="n cur big-ok">210KB</td></tr>
-      <tr><td>ページ容量</td><td class="n">1,249KB</td><td class="n">1,245KB</td><td class="n cur big-ok">824KB</td></tr>
+      <tr><td>スコア</td><td class="n">94</td><td class="n">94</td><td class="n cur big-ok">95</td></tr>
+      <tr><td>LCP（表示完了）</td><td class="n">2.54s</td><td class="n">2.53s</td><td class="n cur">2.59s</td></tr>
+      <tr><td>LCP 1回目（外れ値）</td><td class="n">7.38s</td><td class="n">7.18s</td><td class="n cur big-ok">5.03s</td></tr>
+      <tr><td>TTI</td><td class="n">7.40s</td><td class="n">6.04s</td><td class="n cur big-ok">5.32s</td></tr>
+      <tr><td>画像</td><td class="n">802KB</td><td class="n">210KB</td><td class="n cur big-ok">142KB</td></tr>
+      <tr><td>ページ容量</td><td class="n">1,417KB</td><td class="n">824KB</td><td class="n cur big-ok">584KB</td></tr>
     </tbody>
   </table>
   </div>
   <div class="tablewrap">
   <table class="trend">
-    <thead><tr><th>デスクトップ</th><th class="n">09-11</th><th class="n">05:48</th><th class="n">06:23</th></tr></thead>
+    <thead><tr><th>デスクトップ</th><th class="n">05:03</th><th class="n">06:23</th><th class="n">06:57</th></tr></thead>
     <tbody>
-      <tr><td>スコア</td><td class="n">99</td><td class="n">99</td><td class="n cur big-ok">100</td></tr>
-      <tr><td>LCP（表示完了）</td><td class="n">0.79s</td><td class="n">0.81s</td><td class="n cur big-ok">0.70s</td></tr>
-      <tr><td>SI（体感速度）</td><td class="n">1.11s</td><td class="n">0.59s</td><td class="n cur big-ok">0.54s</td></tr>
-      <tr><td>TTFB</td><td class="n">0.85s</td><td class="n">0.03s</td><td class="n cur big-ok">0.03s</td></tr>
-      <tr><td>画像</td><td class="n">1,835KB</td><td class="n">2,380KB</td><td class="n cur big-ok">420KB</td></tr>
-      <tr><td>ページ容量</td><td class="n">2,282KB</td><td class="n">2,823KB</td><td class="n cur big-ok">863KB</td></tr>
+      <tr><td>スコア</td><td class="n">99</td><td class="n">100</td><td class="n cur">99</td></tr>
+      <tr><td>LCP（表示完了）</td><td class="n">0.76s</td><td class="n">0.70s</td><td class="n cur">0.78s</td></tr>
+      <tr><td>画像</td><td class="n">2,380KB</td><td class="n big-ok">420KB</td><td class="n cur flat">2,380KB</td></tr>
+      <tr><td>ページ容量</td><td class="n">2,995KB</td><td class="n big-ok">863KB</td><td class="n cur flat">2,823KB</td></tr>
     </tbody>
   </table>
   </div>
@@ -319,12 +327,12 @@ ol.howto strong{color:var(--ink)}
     <h2>完了した作業</h2>
   </div>
   <div class="status">
-    <div class="st done"><span class="ic">✓</span><span class="tx"><strong>エッジキャッシュ</strong> — TTFB 0.85秒 → <strong>0.03秒</strong>。</span><span class="tag">完了</span></div>
-    <div class="st done"><span class="ic">✓</span><span class="tx"><strong>Rocket Loader 無効化</strong> — 読み込みが消えました。</span><span class="tag">完了</span></div>
-    <div class="st done"><span class="ic">✓</span><span class="tx"><strong>画像の入れ替え（STEP 2）</strong> — バナー4枚で <strong>1,961KB 削減</strong>。</span><span class="tag">完了</span></div>
-    <div class="st todo"><span class="ic">—</span><span class="tx"><strong>メインビジュアルの優先読み込み（STEP 3）</strong> — 未実施。<strong>モバイル改善の本命です。</strong></span><span class="tag">次はこれ</span></div>
-    <div class="st todo"><span class="ic">—</span><span class="tx"><strong>preconnect の追加（STEP 4）</strong> — 未実施。0.35秒の改善余地。</span><span class="tag">未実施</span></div>
-    <div class="st partial"><span class="ic">◐</span><span class="tx"><strong>Googleタグ</strong> — 3本目が出る回と出ない回があります。今回のモバイル計測では出ていました（460KB）。</span><span class="tag">様子見</span></div>
+    <div class="st done"><span class="ic">✓</span><span class="tx"><strong>エッジキャッシュ</strong> — TTFB 0.85秒 → <strong>0.04秒</strong>。</span><span class="tag">完了</span></div>
+    <div class="st done"><span class="ic">✓</span><span class="tx"><strong>Rocket Loader 無効化</strong></span><span class="tag">完了</span></div>
+    <div class="st done"><span class="ic">✓</span><span class="tx"><strong>画像の入れ替え</strong> — モバイル画像 802KB → <strong>142KB</strong>。</span><span class="tag">完了</span></div>
+    <div class="st partial"><span class="ic">◐</span><span class="tx"><strong>Lazy Load 除外設定</strong> — 効果はありました（TTI −0.72秒、1回目の外れ値 7.18秒 → 5.03秒）。ただし <code>fetchpriority="high"</code> は<strong>まだ付いていません</strong>。</span><span class="tag">一部効果</span></div>
+    <div class="st bad"><span class="ic">!</span><span class="tx"><strong>Cloudflare キャッシュの削除</strong> — 未実施。<strong>デスクトップに古いページが配信されています。</strong></span><span class="tag">今すぐ</span></div>
+    <div class="st todo"><span class="ic">—</span><span class="tx"><strong><code>vary: User-Agent</code> の除去</strong> — 今回これが実害を出しました。優先度を上げるべきです。</span><span class="tag">要対応</span></div>
   </div>
 </section>
 
