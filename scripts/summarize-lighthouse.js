@@ -146,6 +146,47 @@ function section(label, reports) {
     out.push('');
   }
 
+  // Every third-party request in full. The top-20 list above is truncated, and
+  // when tag setups are in question the whole list is what settles the argument.
+  const tp = reports[0]?.audits?.['third-party-summary']?.details?.items || [];
+  if (tp.length) {
+    out.push('### Third-party by provider');
+    out.push('| Provider | Transfer | Main-thread blocking |');
+    out.push('|---|---|---|');
+    for (const it of tp) {
+      const name = it.entity?.text || it.entity || '(unknown)';
+      out.push(`| ${name} | ${kb(it.transferSize)} | ${Math.round(it.blockingTime || 0)} ms |`);
+    }
+    out.push('');
+    out.push('<details><summary>Every third-party URL</summary>\n');
+    for (const it of tp) {
+      const name = it.entity?.text || it.entity || '(unknown)';
+      out.push(`**${name}**`);
+      for (const sub of it.subItems?.items || []) {
+        out.push(`- ${kb(sub.transferSize)} — \`${String(sub.url || '').slice(0, 140)}\``);
+      }
+      out.push('');
+    }
+    out.push('</details>');
+    out.push('');
+  }
+
+  // Anything served from a host other than the page's own, listed exhaustively.
+  let ownHost = '';
+  try { ownHost = new URL(reports[0]?.finalDisplayedUrl || '').host; } catch {}
+  const external = reqs.filter((r) => {
+    try { return new URL(r.url).host !== ownHost; } catch { return false; }
+  });
+  if (external.length) {
+    out.push(`### All ${external.length} external requests`);
+    out.push('| Size | Type | URL |');
+    out.push('|---|---|---|');
+    for (const r of external.sort((a, b) => (b.transferSize || 0) - (a.transferSize || 0))) {
+      out.push(`| ${kb(r.transferSize)} | ${r.resourceType || '-'} | \`${String(r.url).slice(0, 140)}\` |`);
+    }
+    out.push('');
+  }
+
   out.push(`Total requests: ${reqs.length}`);
   const totalBytes = reqs.reduce((s, r) => s + (r.transferSize || 0), 0);
   out.push(`Total transferred: ${kb(totalBytes)}`);
