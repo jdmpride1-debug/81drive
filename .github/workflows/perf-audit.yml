@@ -70,6 +70,26 @@ jobs:
       - name: Summarize results
         run: node scripts/summarize-lighthouse.js
 
+      - name: Cache headers after the audit
+        if: always()
+        env:
+          TARGET_URL: ${{ github.event.inputs.url || 'https://81drive.com/' }}
+        run: |
+          # Repeated at the end so the cache state always lands in the log tail,
+          # next to the numbers it explains. Two hits: the second shows whether
+          # the first one populated the edge.
+          for i in 1 2; do
+            echo "--- request $i ---"
+            curl -sSI --max-time 30 "$TARGET_URL" 2>/dev/null \
+              | grep -iE '^(cf-cache-status|cf-ray|age|x-nginx-cache|cache-control|last-modified|vary)' \
+              | sed 's/^/  /'
+          done
+          echo "--- which banner does the HTML reference? ---"
+          curl -sS --max-time 30 "$TARGET_URL" 2>/dev/null \
+            | grep -oE '/wp-content/uploads/[0-9]{4}/[0-9]{2}/[^"?]+\.(png|jpe?g|webp)' \
+            | sed 's/%E3%83%90%E3%83%8A%E3%83%BC/BANNER/g' \
+            | sort -u | head -20 | sed 's/^/  /'
+
       - name: Upload reports
         if: always()
         uses: actions/upload-artifact@v4
