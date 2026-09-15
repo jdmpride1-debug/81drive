@@ -242,3 +242,35 @@ md += section('Desktop', desktop);
 
 fs.writeFileSync('perf-summary.md', md);
 console.log(md);
+
+// A compact digest printed last in the job, so reading the result back does not
+// mean paging through six Lighthouse runs' worth of log.
+const brief = (label, reports) => {
+  if (!reports.length) return `${label}: no successful runs`;
+  const m = (id) => median(reports.map((r) => r?.audits?.[id]?.numericValue));
+  const runs = (id) => reports.map((r) => ms(r?.audits?.[id]?.numericValue)).join(' / ');
+  const score = median(reports.map((r) => r?.categories?.performance?.score));
+  const bytes = (reports[0]?.audits?.['resource-summary']?.details?.items || [])
+    .find((i) => i.resourceType === 'total');
+  const imgs = (reports[0]?.audits?.['resource-summary']?.details?.items || [])
+    .find((i) => i.resourceType === 'image');
+  return [
+    `${label}  score ${score == null ? '?' : Math.round(score * 100)}`,
+    `  LCP  ${ms(m('largest-contentful-paint'))}   (runs: ${runs('largest-contentful-paint')})`,
+    `  FCP  ${ms(m('first-contentful-paint'))}    SI ${ms(m('speed-index'))}    TBT ${ms(m('total-blocking-time'))}`,
+    `  TTFB ${ms(m('server-response-time'))}    weight ${kb(bytes?.transferSize)}   images ${kb(imgs?.transferSize)}`,
+  ].join('\n');
+};
+const lcpNode = (reports) =>
+  reports[0]?.audits?.['largest-contentful-paint-element']?.details?.items?.[0]?.items?.[0]?.node?.snippet || '';
+const snip = lcpNode(mobile) || lcpNode(desktop);
+const digest = [
+  '===== KEY NUMBERS =====',
+  brief('MOBILE ', mobile),
+  brief('DESKTOP', desktop),
+  `fetchpriority on LCP image: ${/fetchpriority/i.test(snip) ? 'YES' : 'NO'}`,
+  `loading=lazy on LCP image : ${/loading=["']?lazy/i.test(snip) ? 'YES' : 'no'}`,
+  '=======================',
+].join('\n');
+fs.writeFileSync('perf-brief.txt', digest);
+

@@ -104,3 +104,9 @@ jobs:
       - name: Publish summary
         if: always()
         run: cat perf-summary.md >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
+
+      # Last step on purpose: the digest is what gets read back, and a short
+      # log tail is enough to reach it.
+      - name: Key numbers
+        if: always()
+        run: cat perf-brief.txt 2>/dev/null || echo "(no digest produced)" 
