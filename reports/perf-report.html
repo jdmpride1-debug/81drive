@@ -237,12 +237,12 @@ ol.howto strong{color:var(--ink)}
 <div class="wrap">
 
 <header class="mast">
-  <div class="kicker">Performance Audit · キャッシュ問題の特定</div>
+  <div class="kicker">Performance Audit · 09-15 計測</div>
   <h1>+81DRIVE 表示速度診断</h1>
-  <p class="sub">計測値が回ごとに入れ替わる原因を特定しました。<strong>Cloudflare のキャッシュが削除されておらず、画像入れ替え前のページが配信されています。</strong>これを消すまで、正しい計測も、訪問者への反映もできません。</p>
+  <p class="sub">3日ぶりの計測で、ようやく<strong>キャッシュ問題が解消し、変更後の本当の状態</strong>が測れました。画像の入れ替えは完了しています。ただし新しく1枚、大きな画像が追加されていました。</p>
   <div class="provenance">
-    <span>今回 <b>09-12 07:15</b></span>
-    <span>計測地点 <b>米国リージョン</b></span>
+    <span>今回 <b>09-15 06:32</b></span>
+    <span>前回 <b>09-12</b></span>
     <span>ツール <b>Lighthouse 12</b>／各3回の中央値</span>
   </div>
 </header>
@@ -253,249 +253,168 @@ ol.howto strong{color:var(--ink)}
     <h2>結果</h2>
   </div>
   <div class="verdict">
-    <div class="vcard crit">
-      <div class="lab">配信されているページの古さ</div>
-      <div class="big">2<span style="font-size:20px">時間</span>13<span style="font-size:20px">分前</span></div>
-      <div class="cap"><code>age: 8016</code>。<strong>画像を入れ替える前</strong>に保存されたコピーがそのまま配信されています。</div>
-    </div>
     <div class="vcard ok">
-      <div class="lab">やることは1つだけ</div>
-      <div class="big">Purge<span style="font-size:20px"> Everything</span></div>
-      <div class="cap">Cloudflare でキャッシュを削除するだけです。<strong>サーバーやページ側に問題はありません。</strong></div>
+      <div class="lab">画像の入れ替え</div>
+      <div class="big">完了<span style="font-size:20px"> ✓</span></div>
+      <div class="cap">旧PNGバナーは<strong>すべて JPG に置き換わりました</strong>。HTMLを全件確認済みです。</div>
+    </div>
+    <div class="vcard crit">
+      <div class="lab">新たに増えた画像</div>
+      <div class="big">246<span style="font-size:20px">KB</span></div>
+      <div class="cap"><code>名称未設定のデザイン.png</code>。以前は31KBでしたが、<strong>8倍に肥大化</strong>してページ最大の要素になっています。</div>
     </div>
   </div>
   <div class="callout">
-    <div class="lab">訪問者にも影響しています</div>
-    <p>これは計測だけの問題ではありません。<strong>いま 81drive.com を開いた人にも、入れ替え前の重いページが表示されています。</strong>放置しても4時間で自然に切れますが、削除すれば即座に解消します。</p>
+    <div class="lab">正直な現状</div>
+    <p>サーバー応答（TTFB 0.02秒）と<strong>デスクトップは良好</strong>です。一方<strong>モバイルの LCP は 2.52秒 → 3.73秒 に悪化</strong>しました。原因は下に挙げる3つで、いずれも対処法がはっきりしています。</p>
   </div>
 </section>
 
 <section>
   <div class="sec-head">
     <span class="sec-num">02</span>
-    <h2>原因は確定しました</h2>
-    <span class="note">07:15 のレスポンスヘッダー</span>
+    <h2>数値</h2>
+    <span class="note">09-11 は着手前</span>
   </div>
-  <pre class="ev">07:15 の計測        07:27 の計測
-<b>age: 8016</b>          <b>age: 14294</b>        ← 3時間58分前のコピー
-last-modified      last-modified
- 05:02:22           <b>03:29:37</b>          ← さらに古い版
-cf-cache-status: HIT   cf-cache-status: HIT
-cf-ray: ...-ORD        cf-ray: ...-IAD     ← 別拠点＝別のコピー
-<b>x-nginx-cache: MISS</b>                       ← サーバー側は正常</pre>
-  <p><strong><code>age</code> は「このコピーが保存されてから何秒経ったか」です。</strong>キャッシュを削除していれば <code>0</code> に戻ります。2回の計測で 8,016秒 と 14,294秒、どちらも<strong>設定変更より前</strong>のコピーでした。</p>
-  <p><code>x-nginx-cache: MISS</code> なので、<strong>サーバー側のキャッシュは原因ではありません</strong>。Cloudflare の1点だけです。拠点（cf-ray の末尾 ORD / IAD など）ごとに別のコピーを持つため、計測のたびに違う古さのページが返ってきます。</p>
-  <div class="callout">
-    <div class="lab">結論：これを消すまで計測できません</div>
-    <p><strong>Cloudflare のキャッシュ削除が実行されていません。</strong>そのため、画像の入れ替えも、SWELL のキャッシュ設定変更も、まだ一度も計測に反映されていません。<strong>失敗したのではなく、変更後のページをまだ見られていない</strong>という状態です。</p>
-  </div>
-  <h3 style="font-size:14px;margin:24px 0 8px">2つの方法があります</h3>
-  <ol class="howto">
-    <li><strong>Purge Everything（本命）</strong> — <span class="path">dash.cloudflare.com</span> → 81drive.com → 左メニュー <strong>Caching</strong> → <strong>Configuration</strong> → <strong>Purge Everything</strong> → 確認ダイアログでもう一度クリック。</li>
-    <li><strong>Development Mode（すぐ試したい場合）</strong> — 同じ <strong>Caching</strong> メニュー内にあるスイッチです。オンにすると<strong>3時間だけキャッシュを完全に無効化</strong>し、常に最新のページが配信されます。検証が終わったらオフに戻してください。<br><span class="path">※ オンの間は表示が遅くなります（TTFB が 0.02秒 → 0.6秒 程度に戻ります）</span></li>
-  </ol>
-  <p style="font-size:13.5px"><strong>おすすめは 2 → 1 の順です。</strong>Development Mode で変更が正しく反映されているか確認し、問題なければオフに戻して Purge Everything を実行します。</p>
-  <p>新旧が入れ替わって見えたのは、<strong>Cloudflare が世界中の拠点ごとに独立したキャッシュを持つ</strong>ためです。入れ替え後に新しく取得した拠点は新しいページを、05:02 の版を保持したままの拠点は古いページを返します。<code>vary: User-Agent</code> がこれをさらに分割し、同じ拠点でもパソコンとスマホで別々のコピーになります。</p>
-
-  <h3 style="font-size:14px;margin:26px 0 8px">追加で見つかった旧PNG</h3>
-  <p>HTMLが参照している画像を全件調べたところ、<strong>まだ対応していない旧PNGが他に7枚</strong>ありました。ページ下部にあり遅延読み込みされるため、これまでの計測には現れていませんでした。</p>
-  <pre class="ev">/wp-content/uploads/2026/08/498.png
-/wp-content/uploads/2026/08/499.png
-/wp-content/uploads/2026/08/500.png
-/wp-content/uploads/2026/08/NSX.png
-/wp-content/uploads/2026/08/Supra.png
-/wp-content/uploads/2026/08/TOKYO-TOWER.png
-/wp-content/uploads/2026/08/WebSite用-画像生成-54.png</pre>
-  <p><strong>計測値には出ませんが、下までスクロールした訪問者は実際にダウンロードしています。</strong>キャッシュの件が片付いたら、この7枚も同じ手順（Squoosh）で軽くする価値があります。</p>
-
-  <h3 style="font-size:14px;margin:26px 0 8px">推移</h3>
   <div class="tablewrap" style="margin-bottom:20px">
   <table class="trend">
-    <thead><tr><th>モバイル</th><th class="n">05:03</th><th class="n">06:23</th><th class="n">06:57</th></tr></thead>
+    <thead><tr><th>モバイル</th><th class="n">09-11</th><th class="n">09-12</th><th class="n">09-15</th></tr></thead>
     <tbody>
-      <tr><td>スコア</td><td class="n">94</td><td class="n">94</td><td class="n cur big-ok">95</td></tr>
-      <tr><td>LCP（表示完了）</td><td class="n">2.54s</td><td class="n">2.53s</td><td class="n cur">2.59s</td></tr>
-      <tr><td>LCP 1回目（外れ値）</td><td class="n">7.38s</td><td class="n">7.18s</td><td class="n cur big-ok">5.03s</td></tr>
-      <tr><td>TTI</td><td class="n">7.40s</td><td class="n">6.04s</td><td class="n cur big-ok">5.32s</td></tr>
-      <tr><td>画像</td><td class="n">802KB</td><td class="n">210KB</td><td class="n cur big-ok">142KB</td></tr>
-      <tr><td>ページ容量</td><td class="n">1,417KB</td><td class="n">824KB</td><td class="n cur big-ok">584KB</td></tr>
+      <tr><td>LCP（表示完了）</td><td class="n">2.42s</td><td class="n">2.52s</td><td class="n cur flat">3.73s</td></tr>
+      <tr><td>FCP</td><td class="n">2.07s</td><td class="n">2.02s</td><td class="n cur">2.04s</td></tr>
+      <tr><td>SI（体感速度）</td><td class="n">2.44s</td><td class="n">2.04s</td><td class="n cur">2.20s</td></tr>
+      <tr><td>TTI</td><td class="n">6.57s</td><td class="n">5.87s</td><td class="n cur big-ok">6.20s</td></tr>
+      <tr><td>TTFB</td><td class="n">0.82s</td><td class="n">0.02s</td><td class="n cur big-ok">0.02s</td></tr>
+      <tr><td>ページ容量</td><td class="n">1,249KB</td><td class="n">1,244KB</td><td class="n cur big-ok">944KB</td></tr>
     </tbody>
   </table>
   </div>
   <div class="tablewrap">
   <table class="trend">
-    <thead><tr><th>デスクトップ</th><th class="n">05:03</th><th class="n">06:23</th><th class="n">06:57</th></tr></thead>
+    <thead><tr><th>デスクトップ</th><th class="n">09-11</th><th class="n">09-12</th><th class="n">09-15</th></tr></thead>
     <tbody>
-      <tr><td>スコア</td><td class="n">99</td><td class="n">100</td><td class="n cur">99</td></tr>
-      <tr><td>LCP（表示完了）</td><td class="n">0.76s</td><td class="n">0.70s</td><td class="n cur">0.78s</td></tr>
-      <tr><td>画像</td><td class="n">2,380KB</td><td class="n big-ok">420KB</td><td class="n cur flat">2,380KB</td></tr>
-      <tr><td>ページ容量</td><td class="n">2,995KB</td><td class="n big-ok">863KB</td><td class="n cur flat">2,823KB</td></tr>
+      <tr><td>スコア</td><td class="n">99</td><td class="n">100</td><td class="n cur big-ok">99</td></tr>
+      <tr><td>LCP（表示完了）</td><td class="n">0.79s</td><td class="n">0.73s</td><td class="n cur big-ok">0.91s</td></tr>
+      <tr><td>FCP</td><td class="n">0.57s</td><td class="n">0.55s</td><td class="n cur big-ok">0.53s</td></tr>
+      <tr><td>TTFB</td><td class="n">0.85s</td><td class="n">0.02s</td><td class="n cur big-ok">0.02s</td></tr>
+      <tr><td>ページ容量</td><td class="n">2,282KB</td><td class="n">2,995KB</td><td class="n cur big-ok">1,032KB</td></tr>
     </tbody>
   </table>
   </div>
+  <p style="margin-top:16px"><strong>デスクトップは 99点・LCP 0.91秒</strong>で目標を維持しています。3回の実測値も 0.90 / 0.97 / 0.91秒 とほぼ揃っており、以前のような大きな振れはなくなりました。</p>
 </section>
 
 <section>
   <div class="sec-head">
     <span class="sec-num">03</span>
-    <h2>完了した作業</h2>
+    <h2>モバイルが遅くなった3つの理由</h2>
   </div>
-  <div class="status">
-    <div class="st done"><span class="ic">✓</span><span class="tx"><strong>エッジキャッシュ</strong> — TTFB 0.85秒 → <strong>0.04秒</strong>。</span><span class="tag">完了</span></div>
-    <div class="st done"><span class="ic">✓</span><span class="tx"><strong>Rocket Loader 無効化</strong></span><span class="tag">完了</span></div>
-    <div class="st done"><span class="ic">✓</span><span class="tx"><strong>画像の入れ替え</strong> — モバイル画像 802KB → <strong>142KB</strong>。</span><span class="tag">完了</span></div>
-    <div class="st partial"><span class="ic">◐</span><span class="tx"><strong>Lazy Load 除外設定</strong> — 効果はありました（TTI −0.72秒、1回目の外れ値 7.18秒 → 5.03秒）。ただし <code>fetchpriority="high"</code> は<strong>まだ付いていません</strong>。</span><span class="tag">一部効果</span></div>
-    <div class="st bad"><span class="ic">!</span><span class="tx"><strong>Cloudflare キャッシュの削除</strong> — 未実施。<strong>デスクトップに古いページが配信されています。</strong></span><span class="tag">今すぐ</span></div>
-    <div class="st todo"><span class="ic">—</span><span class="tx"><strong><code>vary: User-Agent</code> の除去</strong> — 今回これが実害を出しました。優先度を上げるべきです。</span><span class="tag">要対応</span></div>
+
+  <div class="act">
+    <div class="act-head"><span class="rank">1</span><h3><code>名称未設定のデザイン.png</code> が 246KB に肥大化</h3><span class="gain">−225KB</span></div>
+    <div class="act-body">
+      <div class="why">
+        <b>何が起きたか：</b>以前このファイルは <b>300×100px・31KB</b> でした。いまは <b>1024×341px・246KB</b>（モバイル版でも 768×256px・151KB）になっています。<b>ページ内で最も重い要素</b>で、JavaScript より大きいです。
+      </div>
+      <p>Lighthouse の判定は明確です。</p>
+      <pre class="ev">実際の表示幅       : 150px 相当
+配信している幅     : 1024px
+無駄になっている分 : 240KB（全体の97%）
+WebP化での削減     : 225KB</pre>
+      <p><strong>おそらくロゴかテキスト入りの帯状バナーです。</strong>この種の画像が246KBになるのは明らかに異常で、元画像が大きいままアップロードされた可能性が高いです。</p>
+      <div class="check">
+        <div class="lab">対処</div>
+        Squoosh で <strong>幅300px・WebPまたはJPG</strong> に変換して差し替えてください。文字が入っているなら PNG のまま幅を300pxに落とすだけでも <strong>200KB以上減ります</strong>。
+      </div>
+    </div>
+  </div>
+
+  <div class="act">
+    <div class="act-head"><span class="rank">2</span><h3>メインビジュアルが大きくなった</h3><span class="gain b">LCP に直撃</span></div>
+    <div class="act-body">
+      <div class="why">
+        <b>何が起きたか：</b>LCP の対象画像が <code>メインビジュアル用.jpeg</code>（1200×675）から <code>Hopping-Daikoku-PA①.jpg</code>（<b>1280×720</b>）に変わりました。画像自体は 29KB と軽く<b>ファイルサイズに問題はありません</b>が、寸法が大きくなった分だけ描画完了が遅れます。
+      </div>
+      <p>そして<strong>この画像にもまだ <code>fetchpriority="high"</code> が付いていません。</strong>計測で取得した実際のHTMLがこちらです。</p>
+      <pre class="ev">&lt;img width="1280" height="720"
+     src=".../Hopping-Daikoku-PA①.jpg"
+     class="p-mainVisual__img u-obf-cover"
+     <b>decoding="async"</b>&gt;        ← fetchpriority がない</pre>
+      <p>3回の実測値は <strong>6.98 / 3.46 / 3.73秒</strong>。1回目だけ突出する例のパターンが続いています。<strong>これがモバイルLCP悪化の主因です。</strong></p>
+    </div>
+  </div>
+
+  <div class="act">
+    <div class="act-head"><span class="rank">3</span><h3>Googleタグが再び3本</h3><span class="gain b">−173KB</span></div>
+    <div class="act-body">
+      <div class="why">
+        <b>何が起きたか：</b>モバイル計測で、例の3本目（<code>&amp;cx=c</code> 付き）が再び読み込まれていました。加えて GTM の計測用画像が5件追加されており、<b>サードパーティが12件・496KB</b> に増えています。
+      </div>
+      <pre class="ev">173KB  gtag/js?id=GT-TX9NK383
+173KB  gtag/js?id=GT-TX9NK383<b>&amp;cx=c&amp;gtm=4e69b1</b>
+115KB  gtm.js?id=GTM-WFGD8X5Q
+─────
+460KB  ＋ GTM計測用画像 5件</pre>
+      <p>これは<strong>出る回と出ない回がある</strong>挙動で、以前から変わっていません。Lighthouse はモバイルで「未使用のJavaScript削減 = 1.21秒」を最大の改善余地に挙げています。<strong>ただし優先度は 1・2 の後で構いません。</strong></p>
+    </div>
   </div>
 </section>
 
 <section>
   <div class="sec-head">
     <span class="sec-num">04</span>
-    <h2>次にやること</h2>
-    <span class="note">モバイルを1秒台にするための残り</span>
+    <h2>キャッシュについて</h2>
   </div>
-
-  <div class="act">
-    <div class="act-head"><span class="rank">!</span><h3>なぜモバイルだけ変わらなかったのか</h3><span class="gain b">仕組みの説明</span></div>
-    <div class="act-body">
-      <p>LCP は「<strong>最初の画面に見える一番大きい要素</strong>が表示されるまでの時間」です。今回軽くしたバナー4枚は<strong>スクロールした先</strong>にあるため、LCP の計測対象ではありません。</p>
-      <p>LCP の対象は一貫して<strong>トップのメインビジュアル</strong>（<code>メインビジュアル用.jpeg</code>）です。この画像は「後回しでいい画像」として扱われているため、読み込みが遅れます。</p>
-      <pre class="ev">モバイル LCP の3回の実測値
-7.18s ← 1回目だけ突出（優先指定がないため順番待ちになる）
-2.53s
-2.50s</pre>
-      <p><strong>この「1回目だけ極端に遅い」パターンは4回連続で出ています。</strong>STEP 3 を実施すれば、この振れ幅が消えて安定します。容量はもう十分に減ったので、<strong>残るのは読み込む順番の問題だけ</strong>です。</p>
-    </div>
+  <pre class="ev">x-nginx-cache: HIT
+age: 76365                                   ← 21時間13分前のコピー
+last-modified: Mon, 14 Sep 2026 09:19:30 GMT
+cache-control: max-age=14400                 ← 4時間の指定
+cf-cache-status: HIT</pre>
+  <p>内容は<strong>入れ替え後のもので正しい</strong>ので、計測結果は有効です。ただし <code>age</code>（21時間）が <code>max-age</code>（4時間）を大きく超えています。これは <strong>Cloudflare 側の保持期間が、サーバーの指定より長く設定されている</strong>ことを意味します。</p>
+  <div class="warn">
+    <div class="lab">運用上の注意</div>
+    今後サイトを更新したときも、<strong>最大1日ほど古いページが配信され続ける可能性があります。</strong>更新のたびに <strong>Purge Everything</strong> を実行する習慣をつけてください。前回の「画像を入れ替えたのに反映されない」はこれが原因でした。
   </div>
 </section>
 
 <section>
   <div class="sec-head">
     <span class="sec-num">05</span>
-    <h2>手順</h2>
-    <span class="note">STEP 3 から実施してください</span>
+    <h2>着手前からの通算</h2>
   </div>
-
-<div class="step">
-    <div class="step-head">
-      <span class="step-no">STEP 3</span>
-      <h3>トップの大きな画像を「最優先」で読み込ませる</h3>
-      <span class="step-meta"><span class="chip gain">表示の安定化</span><span class="chip easy">設定で対応可</span></span>
-    </div>
-    <div class="step-body">
-      <div class="why">
-        <b>なぜ必要か：</b>トップページの一番大きい画像（メインビジュアル）が、<b>「後回しでいい画像」として扱われています</b>。そのため読み込みが遅れ、計測3回のうち1回は表示に <b>7.38秒</b> かかりました（他2回は2.5秒）。この<b>ばらつき</b>がまさにその証拠です。「最初に見える画像は後回しにしない」と指定すれば安定します。
-      </div>
-      <p style="font-size:13.5px;margin-bottom:10px">EWWW の遅延読み込み機能から、この画像だけを<strong>除外</strong>するのが一番安全な方法です。</p>
-      <ol class="howto">
-        <li><span class="path">設定 → EWWW Image Optimizer</span> を開きます。</li>
-        <li><strong>「Lazy Load」（遅延読み込み）</strong>の設定欄を探します。「Easy Mode」にある場合と、「Advanced」の中にある場合があります。</li>
-        <li>その近くにある<strong>「除外するもの」「Exclude」</strong>という入力欄に、次の1行を貼り付けます。<br><span class="path">p-mainVisual__img</span></li>
-        <li><strong>保存</strong>します。</li>
-        <li>SWELL側にも遅延読み込み設定があります。<span class="path">SWELL設定 → 高速化</span> を開き、<strong>「遅延読み込み」</strong>の項目に除外設定があれば同じ文字列を追加してください。</li>
-      </ol>
-
-      <div class="warn">
-        <div class="lab">補足</div>
-        遅延読み込みのプログラム（lazysizes）が <strong>EWWW と SWELL で2本</strong>読み込まれています。どちらか片方で十分なので、<span class="path">SWELL設定 → 高速化</span> で遅延読み込みをオフにして EWWW 側に任せると、さらに軽くなります。<strong>ただし STEP 1・2 を終えてから</strong>、1つずつ試してください。
-      </div>
-
-      <div class="check">
-        <div class="lab">できたらこうなる</div>
-        計測3回の LCP のばらつき（7.38s / 2.54s / 2.53s）が揃い、<strong>毎回ほぼ同じ数値</strong>になります。
-      </div>
-    </div>
+  <div class="tablewrap">
+  <table class="road">
+    <thead><tr><th>項目</th><th class="n">09-11（着手前）</th><th class="n">09-15（現在）</th><th>変化</th></tr></thead>
+    <tbody>
+      <tr><td>サーバー応答 (TTFB)</td><td class="n">0.85s</td><td class="n p2">0.02s</td><td><span class="delta up">42倍速く</span></td></tr>
+      <tr><td>デスクトップ容量</td><td class="n">2,282KB</td><td class="n p2">1,032KB</td><td><span class="delta up">−55%</span></td></tr>
+      <tr><td>モバイル容量</td><td class="n">1,249KB</td><td class="n p2">944KB</td><td><span class="delta up">−24%</span></td></tr>
+      <tr><td>デスクトップ LCP</td><td class="n">0.79s</td><td class="n p2">0.91s</td><td><span class="delta flat">目標維持</span></td></tr>
+      <tr><td>モバイル LCP</td><td class="n">2.42s</td><td class="n now">3.73s</td><td><span class="delta down">要対処</span></td></tr>
+    </tbody>
+  </table>
   </div>
-
-  <div class="step">
-    <div class="step-head">
-      <span class="step-no">STEP 4</span>
-      <h3>外部サーバーへの接続を前倒しする（preconnect）</h3>
-      <span class="step-meta"><span class="chip gain">−0.33秒</span><span class="chip easy">1行追加</span></span>
-    </div>
-    <div class="step-body">
-      <div class="why">
-        <b>なぜ必要か：</b>Googleや口コミサービスなど<b>外部のサーバー</b>から読み込むファイルがあります。ブラウザは「必要だとわかった時点」で接続を始めるため、その分だけ待ち時間が生まれます。<b>「あとでこのサーバーを使うよ」と先に伝えておく</b>と、その待ち時間が消えます。Lighthouse の試算で 0.33秒 の短縮です。
-      </div>
-      <ol class="howto">
-        <li><span class="path">SWELL設定 → 一般</span> の中にある<strong>「&lt;head&gt;内に出力するコード」</strong>の入力欄を開きます。（STEP 1 で確認した欄と同じ場所です）</li>
-        <li>次の3行を<strong>そのまま貼り付けて</strong>保存します。</li>
-      </ol>
-      <pre class="ev">&lt;link rel="preconnect" href="https://www.googletagmanager.com" crossorigin&gt;
-&lt;link rel="preconnect" href="https://cdn.trustindex.io" crossorigin&gt;
-&lt;link rel="preconnect" href="https://static.cloudflareinsights.com" crossorigin&gt;</pre>
-      <div class="warn">
-        <div class="lab">順番に注意</div>
-        <strong>STEP 1 を先に終わらせてください。</strong>STEP 1 で GTM を外した場合、1行目は不要になります。
-      </div>
-    </div>
-  </div>
-
-  <div class="step">
-    <div class="step-head">
-      <span class="step-no">STEP 5</span>
-      <h3>Cloudflareのキャッシュを消す（毎回の仕上げ）</h3>
-      <span class="step-meta"><span class="chip easy">30秒</span></span>
-    </div>
-    <div class="step-body">
-      <div class="why">
-        <b>なぜ必要か：</b>Cloudflare は古いページのコピーを持っています。設定を変えても<b>コピーが残っていると変更が反映されません</b>。「直したのに変わらない」の原因はほぼこれです。STEP 1〜4 のあと毎回実行してください。
-      </div>
-      <ol class="howto">
-        <li><span class="path">dash.cloudflare.com</span> にログインします。</li>
-        <li>サイト一覧から <strong>81drive.com</strong> を選びます。</li>
-        <li>左メニューの <strong>「Caching」→「Configuration」</strong>を開きます。</li>
-        <li><strong>「Purge Everything」</strong>（すべて削除）ボタンを押し、確認ダイアログでもう一度押します。</li>
-        <li>1〜2分待ってから、スマホやシークレットウィンドウでサイトを開いて確認します。</li>
-      </ol>
-      <div class="warn">
-        <div class="lab">ついでに直せること</div>
-        現在キャッシュの有効期間が <strong>4時間</strong>（<code>max-age=14400</code>）です。今回の計測はちょうど期限切れの瞬間に当たりました（<code>cf-cache-status: MISS</code>）。4時間ごとに1人目の訪問者だけが遅くなる状態なので、<span class="path">Caching → Configuration → Browser Cache TTL</span> や Cache Rule の Edge TTL を<strong>1日以上</strong>に伸ばすと安定します。更新時は上の Purge を実行すれば即座に反映されます。
-      </div>
-    </div>
-  </div>
+  <p style="margin-top:18px"><strong>インフラ側（キャッシュ・サーバー応答）の改善は完全に成功し、維持されています。</strong>残っているのは<strong>コンテンツ側だけ</strong>です。上の 1（画像1枚の差し替え）と 2（優先読み込み）を実施すれば、モバイルは 1秒台が見えてきます。</p>
 </section>
 
 <section>
   <div class="sec-head">
     <span class="sec-num">06</span>
-    <h2>ここからの見込み</h2>
-    <span class="note">推定値</span>
-  </div>
-  <div class="tablewrap">
-  <table class="road">
-    <thead><tr><th>段階</th><th>内容</th><th class="n">モバイル LCP</th><th class="n">デスクトップ容量</th></tr></thead>
-    <tbody>
-      <tr><td>09-11</td><td>着手前</td><td class="n">2.42s</td><td class="n">2,282KB</td></tr>
-      <tr><td class="now">現在</td><td>キャッシュ＋画像まで完了</td><td class="n now">2.53s</td><td class="n p2">863KB</td></tr>
-      <tr><td class="p2"><strong>STEP 3 後</strong></td><td>メインビジュアルの優先読み込み</td><td class="n p2">約 1.3〜1.7s</td><td class="n">863KB</td></tr>
-      <tr><td><strong>STEP 4 後</strong></td><td>preconnect の追加</td><td class="n">約 1.0〜1.4s</td><td class="n">863KB</td></tr>
-    </tbody>
-  </table>
-  </div>
-  <p style="margin-top:18px"><strong>デスクトップは目標を達成しました（0.70秒・100点）。</strong>残りはモバイルのみで、鍵は STEP 3 です。容量はすでに十分減っているため、<strong>あとは「メインビジュアルを後回しにしない」と指定するだけ</strong>で1秒台に届く見込みです。</p>
-</section>
-
-<section>
-  <div class="sec-head">
-    <span class="sec-num">07</span>
-    <h2>終わったら再計測</h2>
+    <h2>次にやること</h2>
+    <span class="note">上から順に</span>
   </div>
   <ol class="howto">
-    <li>GitHub のリポジトリ <span class="path">jdmpride1-debug/81drive</span> を開きます。</li>
-    <li>上部タブの <strong>「Actions」</strong>をクリックします。</li>
-    <li>左側の <strong>「Performance audit (US)」</strong>を選びます。</li>
-    <li>右側の <strong>「Run workflow」</strong>ボタン →緑の <strong>「Run workflow」</strong>を押します。</li>
-    <li>5分ほどで完了します。実行結果を開くと、下の方に数値の表が出ます。</li>
+    <li><strong><code>名称未設定のデザイン.png</code> を差し替える</strong> — Squoosh で幅300pxに縮小。<strong>1枚で225KB減ります。</strong>これが今いちばん費用対効果が高い作業です。</li>
+    <li><strong>メインビジュアルを優先読み込みにする</strong> — <span class="path">設定 → EWWW Image Optimizer</span> の「Above the Fold」を <strong>2</strong> に。前回設定されていれば、新しい画像にも効いているはずなので、効いていない場合は SWELL 側の遅延読み込み（<span class="path">SWELL設定 → 高速化</span>）を確認してください。</li>
+    <li><strong>更新したら Purge Everything</strong> — <span class="path">dash.cloudflare.com</span> → Caching → Configuration。今後は更新のたびに必須です。</li>
+    <li><strong>再計測</strong> — <span class="path">Actions → Performance audit (US) → Run workflow</span>。</li>
   </ol>
-  <p style="margin-top:16px"><strong>コツ：</strong>STEP を全部まとめてやるより、<strong>1つ終えるごとに再計測</strong>してください。どの作業がどれだけ効いたかがはっきりし、もし数値が悪化しても原因がすぐ特定できます。毎週月曜にも自動で計測されます。</p>
+  <p style="margin-top:16px">Googleタグの件（3本目）は、上の3つが終わってから取り組めば十分です。</p>
 </section>
 
 <footer>
   <p>+81DRIVE（JDM PRIDE株式会社）／ WordPress + SWELL 2.12.0 ／ Cloudflare ／ EWWW Image Optimizer<br>
-  計測 2026-09-12 06:23 · Lighthouse 12 · 米国リージョン · モバイル/デスクトップ各3回の中央値</p>
+  計測 2026-09-15 06:32 · Lighthouse 12 · 米国リージョン · モバイル/デスクトップ各3回の中央値</p>
 </footer>
 
 </div>
