@@ -263,12 +263,12 @@ figcaption{font-size:12.5px;color:var(--muted);text-align:center;margin-top:10px
 <div class="wrap">
 
 <header class="mast">
-  <div class="kicker">作業手順 · 2026-09-15 時点</div>
+  <div class="kicker">作業手順 · 09-15 07:39 更新</div>
   <h1>+81DRIVE 作業手順</h1>
   <p class="sub">いま残っている作業を、やる順に並べました。<strong>上から順に3つ</strong>やれば、モバイルの表示が1秒台に入る見込みです。</p>
   <div class="provenance">
-    <span>根拠 <b>09-15 06:32 の実測</b></span>
-    <span>現在 <b>モバイル LCP 3.73s ／ デスクトップ 0.91s</b></span>
+    <span>根拠 <b>09-15 07:39 の実測</b></span>
+    <span>現在 <b>モバイル LCP 3.52s ／ デスクトップ 1.04s</b></span>
   </div>
 </header>
 
@@ -369,28 +369,33 @@ figcaption{font-size:12.5px;color:var(--muted);text-align:center;margin-top:10px
   </div>
 
   <div class="task">
-    <div class="task-head"><span class="tnum">やること 2</span><h3>トップの大きな画像を「先に読む」設定にする</h3><span class="effect">LCP −1秒前後</span></div>
+    <div class="task-head"><span class="tnum">やること 2</span><h3>メインビジュアルに「最優先」の指示を出す</h3><span class="effect">LCP −1秒前後</span></div>
     <div class="task-body">
-      <p>LCP（表示完了）の対象は <code>Hopping-Daikoku-PA①.jpg</code> です。<strong>ファイル自体は29KBと軽く、サイズに問題はありません。</strong>読み込む順番が後回しになっているだけです。実測3回が <strong>6.98 / 3.46 / 3.73秒</strong> とばらついているのがその証拠です。</p>
+      <div class="why">
+        <b>09-15 の計測でわかったこと：</b>EWWW の設定（Above the Fold）は<b>すでに効いています</b>。メインビジュアルは<b>遅延読み込みの対象外になっていました</b>（<code>loading="lazy"</code> が付いていないことを確認済み）。<br><br>
+        それでも LCP が改善しないのは、<b>「後回しにしない」だけでは足りず、「最優先で取りに行け」という指示（<code>fetchpriority="high"</code>）が必要</b>だからです。これは EWWW では付けられません。
+      </div>
+      <p><strong>プラグインもコード編集も不要です。</strong>SWELL の入力欄に1行貼るだけで済みます。</p>
       <ol class="howto">
-        <li><span class="path">設定 → EWWW Image Optimizer</span> を開きます。</li>
-        <li><strong>「Above the Fold」</strong>の数値を <strong>2</strong> にします（前回設定済みなら、そのままで構いません）。</li>
-        <li>同じ画面の <strong>「Exclusions」</strong>欄に、次の1行が入っているか確認します。無ければ追加してください。<br><span class="path">p-mainVisual__img</span></li>
-        <li><span class="path">SWELL設定 → 高速化</span> のページを<strong>下にスクロール</strong>し、<strong>画像の遅延読み込み（Lazy Load）</strong>に関する項目を探してオフにします。EWWW と二重に動いているためです。<br><span class="path">※「ページ遷移高速化」は別の設定です（下の補足を参照）</span></li>
-        <li><strong>保存 → Purge Everything</strong>。</li>
+        <li><span class="path">SWELL設定 → 一般</span> を開き、<strong>「&lt;head&gt;内に出力するコード」</strong>の入力欄を探します。</li>
+        <li>下のコードを<strong>そのままコピーして貼り付け</strong>、保存します。</li>
+        <li><strong>Purge Everything</strong> → 再計測。</li>
       </ol>
+      <pre class="ev">&lt;link rel="preload" as="image"
+  href="https://81drive.com/wp-content/uploads/2026/09/Hopping-Daikoku-PA%E2%91%A0.jpg"
+  imagesrcset="https://81drive.com/wp-content/uploads/2026/09/Hopping-Daikoku-PA%E2%91%A0-768x432.jpg 768w,
+               https://81drive.com/wp-content/uploads/2026/09/Hopping-Daikoku-PA%E2%91%A0-1024x576.jpg 1024w,
+               https://81drive.com/wp-content/uploads/2026/09/Hopping-Daikoku-PA%E2%91%A0.jpg 1280w"
+  imagesizes="(max-width: 1280px) 100vw, 1280px"
+  fetchpriority="high"&gt;</pre>
+      <p style="font-size:13.5px">これは「このページを開いたら、まずこの画像を取りに行け」とブラウザに先に伝える指示です。<code>&lt;img&gt;</code> タグ自体をいじらないので、テーマの更新で消える心配もありません。</p>
       <div class="check">
         <div class="lab">できたらこうなる</div>
-        3回の実測値のばらつきが消えて<strong>毎回ほぼ同じ数値</strong>になり、LCP が 3.73秒 → <strong>2秒台前半</strong>まで下がる見込みです。
+        3回の実測値のばらつき（現在 <strong>6.82 / 3.41 / 3.52秒</strong>）が揃い、LCP が <strong>2秒台前半</strong>まで下がる見込みです。
       </div>
       <div class="warn">
-        <div class="lab">まぎらわしい設定があります</div>
-        同じ「高速化」ページにある <strong>「ページ遷移高速化」は別物</strong>です。あれは<strong>次のページへ移動するとき</strong>の速さの設定で、いま測っている「トップページが表示されるまでの時間」には関係しません。<strong>「使用しない」のままで正解です。</strong><br>
-        なお <strong>Pjax は選ばないでください。</strong>SWELL自身が「非推奨」と書いているとおりで、GA4 の計測やメインビジュアルのスライダーが動かなくなることがあります。
-      </div>
-      <div class="warn">
-        <div class="lab">効かなかったら</div>
-        手順4の SWELL 側の遅延読み込みが原因である可能性が高いです。その場合は状況を教えてください。次の手を出します。
+        <div class="lab">1つだけ注意</div>
+        <strong>メインビジュアルの画像を別のものに変更したときは、このコードも書き換えてください。</strong>古い画像を指したままだと、使わない画像を余計にダウンロードすることになります。変更する予定があるなら、先に画像を決めてからこの作業をするほうが確実です。
       </div>
     </div>
   </div>
@@ -448,13 +453,14 @@ figcaption{font-size:12.5px;color:var(--muted);text-align:center;margin-top:10px
     <thead><tr><th>段階</th><th class="n">モバイル LCP</th><th class="n">モバイル容量</th><th>状態</th></tr></thead>
     <tbody>
       <tr><td>着手前（09-11）</td><td class="n">2.42s</td><td class="n">1,249KB</td><td>—</td></tr>
-      <tr><td><strong>現在</strong></td><td class="n" style="color:var(--accent);font-weight:700">3.73s</td><td class="n">944KB</td><td>画像1枚が肥大化</td></tr>
-      <tr><td><strong>やること1・2 の後</strong></td><td class="n" style="color:var(--good);font-weight:700">約 1.5〜2.0s</td><td class="n">約 790KB</td><td><strong>1秒台に到達見込み</strong></td></tr>
-      <tr><td>あとで A〜C の後</td><td class="n" style="color:var(--good);font-weight:700">約 1.0〜1.3s</td><td class="n">約 600KB</td><td>1秒前後</td></tr>
+      <tr><td>09-15 06:32</td><td class="n">3.73s</td><td class="n">944KB</td><td>—</td></tr>
+      <tr><td><strong>現在</strong></td><td class="n" style="color:var(--accent);font-weight:700">3.52s</td><td class="n" style="color:var(--good);font-weight:700">704KB</td><td>容量は改善、LCPは停滞</td></tr>
+      <tr><td><strong>やること1・2 の後</strong></td><td class="n" style="color:var(--good);font-weight:700">約 1.5〜2.2s</td><td class="n">約 550KB</td><td><strong>1秒台に到達見込み</strong></td></tr>
+      <tr><td>あとで A〜C の後</td><td class="n" style="color:var(--good);font-weight:700">約 1.0〜1.5s</td><td class="n">約 400KB</td><td>1秒前後</td></tr>
     </tbody>
   </table>
   </div>
-  <p style="margin-top:18px"><strong>サーバー側（TTFB 0.02秒、着手前の42倍速）はすでに完成しています。</strong>残っているのは画像と読み込み順だけで、どちらも管理画面から対応できます。</p>
+  <p style="margin-top:18px"><strong>サーバー側（TTFB 0.02秒、着手前の42倍速）はすでに完成しています。</strong>直近の計測でモバイルの容量は 944KB → <strong>704KB</strong> に下がりました。LCP が動かないのは <code>fetchpriority</code> が無いこと1点に絞り込めています。</p>
 </section>
 
 <footer>
