@@ -1,0 +1,460 @@
+<title>+81DRIVE 表示速度診断</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Saira+Condensed:wght@500;600;700&display=swap">
+<style>
+:root{
+  --ground:#EDEFF2; --surface:#FFFFFF; --surface-2:#F5F7F9;
+  --ink:#14171C; --ink-2:#3C444F; --muted:#697384;
+  --rule:#D3D9E0; --rule-strong:#B6BFCA;
+  --accent:#C1121F; --accent-soft:#F6DEE0;
+  --good:#0E7C5A; --good-soft:#D8EFE6;
+  --warn:#9C6200; --warn-soft:#F7E8CC;
+  --track:#DFE4EA;
+  --bar-a:#2F3A48; --bar-b:#7C8798;
+  --shadow:0 1px 2px rgba(20,23,28,.06),0 8px 24px -12px rgba(20,23,28,.18);
+}
+:root:not([data-theme="light"]){}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#101317; --surface:#181C22; --surface-2:#1F242B;
+    --ink:#E7EAEE; --ink-2:#BFC7D1; --muted:#8B95A3;
+    --rule:#2B323A; --rule-strong:#3D4650;
+    --accent:#FF5A67; --accent-soft:#3A1C20;
+    --good:#3FBF92; --good-soft:#12312A;
+    --warn:#E0A64A; --warn-soft:#33260F;
+    --track:#272E36;
+    --bar-a:#95A2B3; --bar-b:#5A6674;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#101317; --surface:#181C22; --surface-2:#1F242B;
+  --ink:#E7EAEE; --ink-2:#BFC7D1; --muted:#8B95A3;
+  --rule:#2B323A; --rule-strong:#3D4650;
+  --accent:#FF5A67; --accent-soft:#3A1C20;
+  --good:#3FBF92; --good-soft:#12312A;
+  --warn:#E0A64A; --warn-soft:#33260F;
+  --track:#272E36;
+  --bar-a:#95A2B3; --bar-b:#5A6674;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:"IBM Plex Sans JP",system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+  font-size:15px; line-height:1.75;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:960px;margin:0 auto;padding-inline:20px;padding-block:0 72px}
+.mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+.cond{font-family:"Saira Condensed","IBM Plex Sans JP",sans-serif}
+h1,h2,h3{text-wrap:balance;line-height:1.3;margin:0}
+
+/* ---- masthead ---- */
+.mast{border-bottom:2px solid var(--ink);padding-block:36px 18px;margin-bottom:32px}
+.kicker{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.mast h1{font-size:clamp(30px,6vw,46px);font-weight:700;letter-spacing:-.02em;margin-top:10px}
+.mast .sub{color:var(--muted);margin-top:10px;max-width:62ch}
+.provenance{
+  display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:20px;
+  font-size:12px;color:var(--muted)
+}
+.provenance b{color:var(--ink-2);font-weight:500}
+
+section{margin-top:52px}
+.sec-head{display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--rule);padding-bottom:10px;margin-bottom:24px;flex-wrap:wrap}
+.sec-num{font-size:11px;letter-spacing:.14em;color:var(--accent);font-weight:600}
+.sec-head h2{font-size:21px;font-weight:700;letter-spacing:-.01em}
+.sec-head .note{margin-left:auto;font-size:12px;color:var(--muted)}
+p{margin:0 0 14px;max-width:70ch;color:var(--ink-2)}
+strong{color:var(--ink);font-weight:600}
+
+/* ---- verdict ---- */
+.verdict{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.vcard{background:var(--surface);border:1px solid var(--rule);border-radius:3px;padding:20px;box-shadow:var(--shadow)}
+.vcard.crit{border-left:3px solid var(--accent)}
+.vcard.ok{border-left:3px solid var(--good)}
+.vcard .lab{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.vcard .big{font-family:"Saira Condensed",sans-serif;font-size:44px;font-weight:700;line-height:1;margin-top:8px;font-variant-numeric:tabular-nums}
+.vcard.crit .big{color:var(--accent)}
+.vcard.ok .big{color:var(--good)}
+.vcard .cap{font-size:13px;color:var(--muted);margin-top:8px}
+
+/* ---- instrument panel ---- */
+.panels{display:grid;grid-template-columns:1fr;gap:22px}
+.panel{background:var(--surface);border:1px solid var(--rule);border-radius:3px;box-shadow:var(--shadow);overflow:hidden}
+.panel-head{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--rule);background:var(--surface-2);flex-wrap:wrap}
+.panel-head h3{font-size:15px;font-weight:700}
+.panel-head .cond-cond{font-size:12px;color:var(--muted)}
+.score{margin-left:auto;font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:13px;padding:3px 10px;border-radius:2px;letter-spacing:.04em}
+.score.g{background:var(--good-soft);color:var(--good)}
+.panel-body{padding:18px 20px 22px}
+
+.track-row{display:grid;grid-template-columns:74px 1fr 64px;align-items:center;gap:12px;margin-bottom:9px}
+.track-row .name{font-family:"Saira Condensed",sans-serif;font-weight:600;font-size:14px;letter-spacing:.04em;color:var(--ink-2)}
+.track{position:relative;height:16px;background:var(--track);border-radius:2px;overflow:hidden}
+.fill{position:absolute;inset-block:0;left:0;border-radius:2px;background:linear-gradient(90deg,var(--bar-a),var(--bar-b))}
+.fill.red{background:linear-gradient(90deg,var(--accent),var(--accent))}
+.val{font-family:"IBM Plex Mono",monospace;font-size:13px;font-weight:500;text-align:right;font-variant-numeric:tabular-nums}
+.val.red{color:var(--accent);font-weight:600}
+.goal{position:relative;height:26px;margin:6px 0 2px;grid-column:2}
+.goalline{position:absolute;top:0;bottom:12px;width:2px;background:var(--accent)}
+.goalline span{position:absolute;top:-1px;left:6px;font-size:10px;color:var(--accent);white-space:nowrap;font-weight:600;letter-spacing:.04em}
+.axis{display:grid;grid-template-columns:74px 1fr 64px;gap:12px;margin-top:2px}
+.ticks{display:flex;justify-content:space-between;font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--muted);border-top:1px solid var(--rule);padding-top:4px}
+
+/* ---- weight ---- */
+.weight{display:flex;height:34px;border-radius:3px;overflow:hidden;border:1px solid var(--rule);margin:6px 0 10px}
+.weight div{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;overflow:hidden;white-space:nowrap}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:baseline}
+
+/* ---- evidence ---- */
+pre.ev{
+  background:var(--surface-2);border:1px solid var(--rule);border-left:3px solid var(--accent);
+  border-radius:3px;padding:14px 16px;overflow-x:auto;
+  font-family:"IBM Plex Mono",monospace;font-size:12.5px;line-height:1.7;color:var(--ink-2);margin:0 0 16px
+}
+pre.ev b{color:var(--accent);font-weight:600}
+
+/* ---- actions ---- */
+.act{background:var(--surface);border:1px solid var(--rule);border-radius:3px;margin-bottom:14px;box-shadow:var(--shadow);overflow:hidden}
+.act-head{display:grid;grid-template-columns:34px 1fr auto;gap:14px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--rule)}
+.rank{font-family:"Saira Condensed",sans-serif;font-size:22px;font-weight:700;color:var(--accent);text-align:center;font-variant-numeric:tabular-nums;line-height:1}
+.act-head h3{font-size:15.5px;font-weight:700}
+.gain{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;padding:4px 9px;border-radius:2px;background:var(--good-soft);color:var(--good);white-space:nowrap}
+.gain.b{background:var(--warn-soft);color:var(--warn)}
+.act-body{padding:16px 18px 18px}
+.act-body p:last-child{margin-bottom:0}
+.act-body ul{margin:0 0 14px;padding-left:20px;color:var(--ink-2)}
+.act-body li{margin-bottom:7px}
+.act-body li:last-child{margin-bottom:0}
+.effort{display:inline-block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:var(--muted);border:1px solid var(--rule-strong);border-radius:2px;padding:2px 8px;margin-right:8px}
+code{font-family:"IBM Plex Mono",monospace;font-size:.9em;background:var(--surface-2);border:1px solid var(--rule);border-radius:2px;padding:1px 5px;color:var(--ink)}
+
+/* ---- roadmap ---- */
+.road{width:100%;border-collapse:collapse;font-size:14px}
+.road th,.road td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--rule)}
+.road th{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;border-bottom:1px solid var(--rule-strong)}
+.road td.n{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;text-align:right}
+.road tr:last-child td{border-bottom:none}
+.road .now{color:var(--accent);font-weight:600}
+.road .p2{color:var(--good);font-weight:600}
+.tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--rule);border-radius:3px;box-shadow:var(--shadow)}
+
+.callout{background:var(--accent-soft);border:1px solid var(--accent);border-radius:3px;padding:16px 18px;margin:20px 0}
+.callout p{color:var(--ink);margin:0}
+.callout .lab{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:6px}
+
+footer{margin-top:64px;padding-top:20px;border-top:1px solid var(--rule);font-size:12px;color:var(--muted)}
+footer a{color:var(--accent)}
+
+@media (max-width:640px){
+  .verdict{grid-template-columns:1fr}
+  .track-row,.axis{grid-template-columns:58px 1fr 56px;gap:8px}
+  .act-head{grid-template-columns:26px 1fr;row-gap:8px}
+  .gain{grid-column:2}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<style>
+.delta{font-family:"IBM Plex Mono",monospace;font-size:11.5px;font-weight:600;white-space:nowrap}
+.delta.up{color:var(--good)}
+.delta.down{color:var(--accent)}
+.delta.flat{color:var(--muted)}
+.cmp{width:100%;border-collapse:collapse;font-size:14px}
+.cmp th,.cmp td{padding:9px 11px;border-bottom:1px solid var(--rule);text-align:left}
+.cmp th{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;border-bottom:1px solid var(--rule-strong)}
+.cmp td.n{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;text-align:right}
+.cmp td.m{font-family:"Saira Condensed",sans-serif;font-weight:600;letter-spacing:.04em}
+.cmp tr:last-child td{border-bottom:none}
+.cmp tr.hl td{background:var(--good-soft)}
+.cmp tr.wl td{background:var(--warn-soft)}
+.status{display:grid;gap:10px;margin-top:4px}
+.st{display:grid;grid-template-columns:26px 1fr auto;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--rule-strong);border-radius:3px;padding:12px 16px}
+.st.done{border-left-color:var(--good)}
+.st.partial{border-left-color:var(--warn)}
+.st.todo{border-left-color:var(--rule-strong)}
+.st.bad{border-left-color:var(--accent)}
+.st .ic{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:15px;text-align:center}
+.st.done .ic{color:var(--good)}
+.st.partial .ic{color:var(--warn)}
+.st.bad .ic{color:var(--accent)}
+.st.todo .ic{color:var(--muted)}
+.st .tx{font-size:14px}
+.st .tag{font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+.st.done .tag{color:var(--good)}
+.st.partial .tag{color:var(--warn)}
+.st.bad .tag{color:var(--accent)}
+.st.todo .tag{color:var(--muted)}
+@media (max-width:560px){.st{grid-template-columns:22px 1fr;row-gap:4px}.st .tag{grid-column:2}}
+</style>
+
+<style>
+/* --- step guide --- */
+.step{background:var(--surface);border:1px solid var(--rule);border-radius:3px;margin-bottom:18px;box-shadow:var(--shadow);overflow:hidden}
+.step-head{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:15px 18px;background:var(--surface-2);border-bottom:1px solid var(--rule)}
+.step-no{font-family:"Saira Condensed",sans-serif;font-size:12px;font-weight:700;letter-spacing:.1em;color:#fff;background:var(--accent);border-radius:2px;padding:3px 9px;white-space:nowrap}
+.step-head h3{font-size:16px;font-weight:700}
+.step-meta{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:11px;font-weight:600;letter-spacing:.04em;padding:3px 8px;border-radius:2px;white-space:nowrap}
+.chip.gain{background:var(--good-soft);color:var(--good)}
+.chip.easy{background:var(--surface);border:1px solid var(--rule-strong);color:var(--muted)}
+.step-body{padding:18px}
+.why{background:var(--surface-2);border-left:3px solid var(--rule-strong);padding:12px 14px;border-radius:0 3px 3px 0;margin-bottom:18px;font-size:13.5px;color:var(--ink-2)}
+.why b{color:var(--ink)}
+ol.howto{margin:0;padding:0;list-style:none;counter-reset:ht}
+ol.howto>li{counter-increment:ht;position:relative;padding-left:34px;margin-bottom:15px;color:var(--ink-2)}
+ol.howto>li::before{
+  content:counter(ht);position:absolute;left:0;top:1px;
+  width:22px;height:22px;border-radius:50%;background:var(--ink);color:var(--ground);
+  font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;
+  display:flex;align-items:center;justify-content:center
+}
+ol.howto>li:last-child{margin-bottom:0}
+ol.howto strong{color:var(--ink)}
+.path{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:12.5px;background:var(--surface-2);border:1px solid var(--rule);border-radius:2px;padding:2px 7px;margin:1px 0}
+.check{background:var(--good-soft);border:1px solid var(--good);border-radius:3px;padding:12px 14px;margin-top:16px;font-size:13.5px;color:var(--ink)}
+.check .lab{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--good);font-weight:700;margin-bottom:5px}
+.warn{background:var(--warn-soft);border:1px solid var(--warn);border-radius:3px;padding:12px 14px;margin-top:14px;font-size:13.5px;color:var(--ink)}
+.warn .lab{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--warn);font-weight:700;margin-bottom:5px}
+.glossary{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.gl{background:var(--surface);border:1px solid var(--rule);border-radius:3px;padding:14px 16px}
+.gl dt{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:15px;letter-spacing:.04em;color:var(--accent);margin-bottom:4px}
+.gl dd{margin:0;font-size:13.5px;color:var(--ink-2)}
+.trend{width:100%;border-collapse:collapse;font-size:13.5px}
+.trend th,.trend td{padding:9px 10px;border-bottom:1px solid var(--rule);text-align:left;white-space:nowrap}
+.trend th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;border-bottom:1px solid var(--rule-strong)}
+.trend td.n{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;text-align:right}
+.trend tr:last-child td{border-bottom:none}
+.trend .cur{font-weight:700;color:var(--ink)}
+.flat{color:var(--warn);font-weight:600}
+.big-ok{color:var(--good);font-weight:600}
+</style>
+
+<style>
+.todo-title{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:6px}
+figure{margin:0 0 8px}
+figure svg{max-width:100%;height:auto;display:block;margin:0 auto}
+figcaption{font-size:12.5px;color:var(--muted);text-align:center;margin-top:10px;max-width:60ch;margin-inline:auto}
+.task{background:var(--surface);border:1px solid var(--rule);border-left:4px solid var(--accent);border-radius:3px;margin-bottom:16px;box-shadow:var(--shadow);overflow:hidden}
+.task.later{border-left-color:var(--rule-strong)}
+.task-head{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:14px 18px;background:var(--surface-2);border-bottom:1px solid var(--rule)}
+.tnum{font-family:"Saira Condensed",sans-serif;font-size:13px;font-weight:700;letter-spacing:.08em;color:#fff;background:var(--accent);border-radius:2px;padding:3px 10px;white-space:nowrap}
+.task.later .tnum{background:var(--muted)}
+.task-head h3{font-size:15.5px;font-weight:700}
+.task-body{padding:16px 18px 18px}
+.effect{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;padding:4px 9px;border-radius:2px;background:var(--good-soft);color:var(--good);white-space:nowrap}
+.effect.s{background:var(--surface);border:1px solid var(--rule-strong);color:var(--muted)}
+.rule-box{background:var(--accent-soft);border:1px solid var(--accent);border-radius:3px;padding:16px 18px;margin:20px 0}
+.rule-box .lab{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:8px}
+.rule-box ol{margin:0;padding-left:22px;color:var(--ink)}
+.rule-box li{margin-bottom:5px}
+.goal{width:100%;border-collapse:collapse;font-size:14px}
+.goal th,.goal td{padding:10px 12px;border-bottom:1px solid var(--rule);text-align:left}
+.goal th{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;border-bottom:1px solid var(--rule-strong)}
+.goal td.n{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;text-align:right}
+.goal tr:last-child td{border-bottom:none}
+@media (max-width:560px){.task-head{grid-template-columns:auto 1fr;row-gap:8px}.effect{grid-column:2}}
+</style>
+
+<div class="wrap">
+
+<header class="mast">
+  <div class="kicker">作業手順 · 2026-09-15 時点</div>
+  <h1>+81DRIVE 作業手順</h1>
+  <p class="sub">いま残っている作業を、やる順に並べました。<strong>上から順に3つ</strong>やれば、モバイルの表示が1秒台に入る見込みです。</p>
+  <div class="provenance">
+    <span>根拠 <b>09-15 06:32 の実測</b></span>
+    <span>現在 <b>モバイル LCP 3.73s ／ デスクトップ 0.91s</b></span>
+  </div>
+</header>
+
+<section>
+  <div class="sec-head">
+    <span class="sec-num">00</span>
+    <h2>まず、この流れを覚えてください</h2>
+  </div>
+  <p>これまで「直したのに反映されない」ことが何度も起きました。原因は<strong>キャッシュ（ページのコピー）</strong>です。この仕組みだけ先に理解しておくと、以降の作業がスムーズになります。</p>
+
+  <figure>
+    <svg viewBox="0 0 660 250" role="img" aria-label="Purge を実行しない場合、WordPress の変更は Cloudflare の古いコピーに阻まれて訪問者に届かない。Purge を実行すると届く。">
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <polygon points="0,0 10,5 0,10" fill="currentColor"/>
+        </marker>
+        <marker id="ahr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <polygon points="0,0 10,5 0,10" fill="var(--accent)"/>
+        </marker>
+        <marker id="ahg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <polygon points="0,0 10,5 0,10" fill="var(--good)"/>
+        </marker>
+      </defs>
+
+      <text x="10" y="20" font-size="12" font-weight="700" fill="var(--accent)">Purge しないと…</text>
+      <rect x="10" y="32" width="100" height="42" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <text x="60" y="58" font-size="12" text-anchor="middle" fill="currentColor">あなたが編集</text>
+      <line x1="112" y1="53" x2="162" y2="53" stroke="currentColor" stroke-width="1.5" marker-end="url(#ah)"/>
+      <rect x="170" y="32" width="110" height="42" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <text x="225" y="52" font-size="12" text-anchor="middle" fill="currentColor">WordPress</text>
+      <text x="225" y="67" font-size="11" text-anchor="middle" fill="var(--good)">新しい ✓</text>
+      <line x1="282" y1="53" x2="342" y2="53" stroke="currentColor" stroke-width="1.5" marker-end="url(#ah)"/>
+      <rect x="350" y="32" width="130" height="42" rx="3" fill="none" stroke="var(--accent)" stroke-width="2"/>
+      <text x="415" y="52" font-size="12" text-anchor="middle" fill="currentColor">Cloudflare</text>
+      <text x="415" y="67" font-size="11" text-anchor="middle" fill="var(--accent)">古いコピーが残る</text>
+      <line x1="482" y1="53" x2="537" y2="53" stroke="var(--accent)" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#ahr)"/>
+      <text x="510" y="26" font-size="10.5" text-anchor="middle" fill="var(--accent)">最大1日</text>
+      <rect x="545" y="32" width="105" height="42" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <text x="597" y="52" font-size="12" text-anchor="middle" fill="currentColor">訪問者・計測</text>
+      <text x="597" y="67" font-size="11" text-anchor="middle" fill="var(--accent)">古いまま ✗</text>
+
+      <line x1="10" y1="110" x2="650" y2="110" stroke="currentColor" stroke-width="1" opacity="0.2"/>
+
+      <text x="10" y="148" font-size="12" font-weight="700" fill="var(--good)">Purge すれば…</text>
+      <rect x="10" y="160" width="100" height="42" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <text x="60" y="186" font-size="12" text-anchor="middle" fill="currentColor">あなたが編集</text>
+      <line x1="112" y1="181" x2="162" y2="181" stroke="currentColor" stroke-width="1.5" marker-end="url(#ah)"/>
+      <rect x="170" y="160" width="110" height="42" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <text x="225" y="180" font-size="12" text-anchor="middle" fill="currentColor">WordPress</text>
+      <text x="225" y="195" font-size="11" text-anchor="middle" fill="var(--good)">新しい ✓</text>
+      <line x1="282" y1="181" x2="342" y2="181" stroke="var(--good)" stroke-width="2" marker-end="url(#ahg)"/>
+      <text x="312" y="174" font-size="10.5" text-anchor="middle" fill="var(--good)" font-weight="700">Purge</text>
+      <rect x="350" y="160" width="130" height="42" rx="3" fill="none" stroke="var(--good)" stroke-width="2"/>
+      <text x="415" y="180" font-size="12" text-anchor="middle" fill="currentColor">Cloudflare</text>
+      <text x="415" y="195" font-size="11" text-anchor="middle" fill="var(--good)">取り直す</text>
+      <line x1="482" y1="181" x2="537" y2="181" stroke="var(--good)" stroke-width="2" marker-end="url(#ahg)"/>
+      <rect x="545" y="160" width="105" height="42" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <text x="597" y="180" font-size="12" text-anchor="middle" fill="currentColor">訪問者・計測</text>
+      <text x="597" y="195" font-size="11" text-anchor="middle" fill="var(--good)">新しい ✓</text>
+    </svg>
+    <figcaption>WordPress で保存しても、Cloudflare に残った古いコピーが訪問者に届き続けます。Purge Everything がその古いコピーを消す唯一の操作です。</figcaption>
+  </figure>
+
+  <div class="rule-box">
+    <div class="lab">これが毎回のルールです</div>
+    <ol>
+      <li>WordPress で変更して<strong>保存</strong></li>
+      <li>Cloudflare で <strong>Purge Everything</strong></li>
+      <li>1〜2分待ってから<strong>確認・計測</strong></li>
+    </ol>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="sec-num">01</span>
+    <h2>今日やること</h2>
+    <span class="note">この3つだけ</span>
+  </div>
+
+  <div class="task">
+    <div class="task-head"><span class="tnum">やること 1</span><h3>重すぎる画像を1枚、差し替える</h3><span class="effect">−225KB</span></div>
+    <div class="task-body">
+      <p><code>名称未設定のデザイン.png</code> が <strong>246KB</strong> あります。以前は31KBでした。<strong>いまページで最も重いファイル</strong>で、JavaScriptより大きい状態です。実際は150px幅ほどで表示されているのに、1024px幅で配信されています。</p>
+      <ol class="howto">
+        <li><span class="path">メディア → ライブラリ</span> で <strong>名称未設定のデザイン</strong> を探し、開いて「ファイルをダウンロード」で保存します。</li>
+        <li>ブラウザで <span class="path">squoosh.app</span> を開き、その画像をドラッグ＆ドロップします。</li>
+        <li>右側の <strong>「Resize」にチェック</strong>を入れ、<strong>Width を 300</strong> にします。</li>
+        <li>右下の形式を <strong>WebP</strong>（文字が入っているなら <strong>PNG</strong> のままでも可）にして、ダウンロードします。</li>
+        <li><span class="path">メディア → 新規追加</span> でアップロードし、<strong>トップページの編集画面で差し替え</strong>ます。</li>
+        <li><strong>保存 → Purge Everything</strong>。</li>
+      </ol>
+      <div class="check">
+        <div class="lab">できたらこうなる</div>
+        246KB → <strong>20KB前後</strong>。モバイルのページ容量が 944KB → <strong>790KB前後</strong>に下がります。
+      </div>
+    </div>
+  </div>
+
+  <div class="task">
+    <div class="task-head"><span class="tnum">やること 2</span><h3>トップの大きな画像を「先に読む」設定にする</h3><span class="effect">LCP −1秒前後</span></div>
+    <div class="task-body">
+      <p>LCP（表示完了）の対象は <code>Hopping-Daikoku-PA①.jpg</code> です。<strong>ファイル自体は29KBと軽く、サイズに問題はありません。</strong>読み込む順番が後回しになっているだけです。実測3回が <strong>6.98 / 3.46 / 3.73秒</strong> とばらついているのがその証拠です。</p>
+      <ol class="howto">
+        <li><span class="path">設定 → EWWW Image Optimizer</span> を開きます。</li>
+        <li><strong>「Above the Fold」</strong>の数値を <strong>2</strong> にします（前回設定済みなら、そのままで構いません）。</li>
+        <li>同じ画面の <strong>「Exclusions」</strong>欄に、次の1行が入っているか確認します。無ければ追加してください。<br><span class="path">p-mainVisual__img</span></li>
+        <li><span class="path">SWELL設定 → 高速化</span> を開き、<strong>遅延読み込み（Lazy Load）の設定があればオフ</strong>にします。EWWW と二重に動いているためです。</li>
+        <li><strong>保存 → Purge Everything</strong>。</li>
+      </ol>
+      <div class="check">
+        <div class="lab">できたらこうなる</div>
+        3回の実測値のばらつきが消えて<strong>毎回ほぼ同じ数値</strong>になり、LCP が 3.73秒 → <strong>2秒台前半</strong>まで下がる見込みです。
+      </div>
+      <div class="warn">
+        <div class="lab">効かなかったら</div>
+        手順4の SWELL 側の遅延読み込みが原因である可能性が高いです。その場合は状況を教えてください。次の手を出します。
+      </div>
+    </div>
+  </div>
+
+  <div class="task">
+    <div class="task-head"><span class="tnum">やること 3</span><h3>Purge して、再計測する</h3><span class="effect s">確認</span></div>
+    <div class="task-body">
+      <ol class="howto">
+        <li><span class="path">dash.cloudflare.com</span> → <strong>81drive.com</strong> → 左メニュー <strong>Caching</strong> → <strong>Configuration</strong> → <strong>Purge Everything</strong>。</li>
+        <li>1〜2分待ちます。</li>
+        <li>GitHub の <span class="path">jdmpride1-debug/81drive</span> → 上部タブ <strong>Actions</strong> → 左の <strong>Performance audit (US)</strong> → 右の <strong>Run workflow</strong>。</li>
+        <li>5分ほどで完了します。結果を私に聞いてもらえれば読み解きます。</li>
+      </ol>
+      <p style="margin-bottom:0"><strong>やること1と2をまとめてやってから計測して構いません。</strong>どちらも確実に効く作業なので、切り分けは不要です。</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="sec-num">02</span>
+    <h2>あとで良いこと</h2>
+    <span class="note">今日はやらなくて大丈夫</span>
+  </div>
+
+  <div class="task later">
+    <div class="task-head"><span class="tnum">あとで A</span><h3>Googleタグの3本目</h3><span class="effect s">−173KB</span></div>
+    <div class="task-body">
+      <p>同じ計測IDのタグが3本読み込まれる回があります（出る回と出ない回があります）。設定ミスではないことは確認済みなので<strong>急ぎではありません</strong>。GTM の中身が Meta Pixel だけで、その Meta Pixel が実際には動いていないため、<strong>GTM ごと外せば115KB減ります</strong>。Meta Pixel を今後使う予定があるなら、そのままで構いません。</p>
+    </div>
+  </div>
+
+  <div class="task later">
+    <div class="task-head"><span class="tnum">あとで B</span><h3>下のほうにある旧PNG 2枚</h3><span class="effect s">−数百KB</span></div>
+    <div class="task-body">
+      <p><code>NSX.png</code> と <code>Supra.png</code> がまだ PNG のままです。<strong>ページ下部にあり遅延読み込みされるため、表示速度には影響しません。</strong>ただし下までスクロールした訪問者はダウンロードするので、通信量を減らす意味で、余裕のあるときに やること1 と同じ手順で差し替えてください。</p>
+    </div>
+  </div>
+
+  <div class="task later">
+    <div class="task-head"><span class="tnum">あとで C</span><h3>細かい調整</h3><span class="effect s">−0.3秒程度</span></div>
+    <div class="task-body">
+      <p>preconnect の追加（−0.33秒）、Webフォントの <code>font-display: swap</code>、未使用CSSの削減（40KB）などがあります。<strong>いずれも効果は小さいので、上の作業がすべて終わってからで十分です。</strong></p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="sec-num">03</span>
+    <h2>ゴールの目安</h2>
+  </div>
+  <div class="tablewrap">
+  <table class="goal">
+    <thead><tr><th>段階</th><th class="n">モバイル LCP</th><th class="n">モバイル容量</th><th>状態</th></tr></thead>
+    <tbody>
+      <tr><td>着手前（09-11）</td><td class="n">2.42s</td><td class="n">1,249KB</td><td>—</td></tr>
+      <tr><td><strong>現在</strong></td><td class="n" style="color:var(--accent);font-weight:700">3.73s</td><td class="n">944KB</td><td>画像1枚が肥大化</td></tr>
+      <tr><td><strong>やること1・2 の後</strong></td><td class="n" style="color:var(--good);font-weight:700">約 1.5〜2.0s</td><td class="n">約 790KB</td><td><strong>1秒台に到達見込み</strong></td></tr>
+      <tr><td>あとで A〜C の後</td><td class="n" style="color:var(--good);font-weight:700">約 1.0〜1.3s</td><td class="n">約 600KB</td><td>1秒前後</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p style="margin-top:18px"><strong>サーバー側（TTFB 0.02秒、着手前の42倍速）はすでに完成しています。</strong>残っているのは画像と読み込み順だけで、どちらも管理画面から対応できます。</p>
+</section>
+
+<footer>
+  <p>+81DRIVE（JDM PRIDE株式会社）／ WordPress + SWELL 2.12.0 ／ Cloudflare ／ EWWW Image Optimizer<br>
+  根拠となる計測：2026-09-15 06:32 · Lighthouse 12 · 米国リージョン · 各3回の中央値</p>
+</footer>
+
+</div>
