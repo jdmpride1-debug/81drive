@@ -376,12 +376,17 @@ figcaption{font-size:12.5px;color:var(--muted);text-align:center;margin-top:10px
         <li><span class="path">設定 → EWWW Image Optimizer</span> を開きます。</li>
         <li><strong>「Above the Fold」</strong>の数値を <strong>2</strong> にします（前回設定済みなら、そのままで構いません）。</li>
         <li>同じ画面の <strong>「Exclusions」</strong>欄に、次の1行が入っているか確認します。無ければ追加してください。<br><span class="path">p-mainVisual__img</span></li>
-        <li><span class="path">SWELL設定 → 高速化</span> を開き、<strong>遅延読み込み（Lazy Load）の設定があればオフ</strong>にします。EWWW と二重に動いているためです。</li>
+        <li><span class="path">SWELL設定 → 高速化</span> のページを<strong>下にスクロール</strong>し、<strong>画像の遅延読み込み（Lazy Load）</strong>に関する項目を探してオフにします。EWWW と二重に動いているためです。<br><span class="path">※「ページ遷移高速化」は別の設定です（下の補足を参照）</span></li>
         <li><strong>保存 → Purge Everything</strong>。</li>
       </ol>
       <div class="check">
         <div class="lab">できたらこうなる</div>
         3回の実測値のばらつきが消えて<strong>毎回ほぼ同じ数値</strong>になり、LCP が 3.73秒 → <strong>2秒台前半</strong>まで下がる見込みです。
+      </div>
+      <div class="warn">
+        <div class="lab">まぎらわしい設定があります</div>
+        同じ「高速化」ページにある <strong>「ページ遷移高速化」は別物</strong>です。あれは<strong>次のページへ移動するとき</strong>の速さの設定で、いま測っている「トップページが表示されるまでの時間」には関係しません。<strong>「使用しない」のままで正解です。</strong><br>
+        なお <strong>Pjax は選ばないでください。</strong>SWELL自身が「非推奨」と書いているとおりで、GA4 の計測やメインビジュアルのスライダーが動かなくなることがあります。
       </div>
       <div class="warn">
         <div class="lab">効かなかったら</div>
