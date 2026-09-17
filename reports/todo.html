@@ -393,20 +393,22 @@ ol.micro strong{color:var(--ink)}
     <div class="phase-body">
       <ol class="micro">
         <li>ブラウザで <strong>https://81drive.com/wp-admin/</strong> を開き、WordPress にログインします。</li>
-        <li>左側のメニューを<strong>一番下までスクロール</strong>し、<strong>「SWELL設定」</strong>をクリックします。
-          <span class="ok">画面上部に「カスタマイザー」「エディター設定」「高速化」などのタブが並んだ画面が出ます</span></li>
-        <li>上部のタブから <strong>「一般」</strong>をクリックします。</li>
-        <li>ページを下にスクロールし、<strong>「&lt;head&gt;内に出力するコード」</strong>という見出しの大きな入力欄を探します。
-          <span class="nope">見つからない場合は「高度な設定」タブも見てください。それでも無ければ、その画面のスクリーンショットを送ってください</span></li>
-        <li>その入力欄をクリックします。<strong>すでに何か書いてあれば消さずに、一番下の行に改行して</strong>続けてください。</li>
-        <li>下の枠の中身を<strong>すべてコピーして貼り付け</strong>ます。（枠の右端が切れている場合は横スクロールできます）
+        <li>左メニューの <strong>「外観」</strong>にマウスを合わせ、<strong>「カスタマイズ」</strong>をクリックします。
+          <span class="nope">「SWELL設定」ではありません。こちらは <strong>外観 → カスタマイズ</strong> です</span></li>
+        <li>左側に設定項目が並びます。一番下のほうにある <strong>「高度な設定」</strong>をクリックします。
+          <span class="ok">「headタグ終了直前に出力するコード」という見出しの入力欄が出てきます</span></li>
+        <li><strong>念のためバックアップを取ります。</strong>その入力欄の中をクリックし、<strong>Ctrl + A</strong>（Mac: <strong>⌘ + A</strong>）で全選択 →<strong>Ctrl + C</strong> でコピーし、メモ帳などに貼って保存しておきます。
+          <span class="nope">この欄には Google タグマネージャーのコードが入っています。消すとアクセス解析が止まります</span></li>
+        <li>入力欄の<strong>いちばん先頭</strong>（<code>&lt;!-- Google Tag Manager --&gt;</code> の左側）にカーソルを置きます。<strong>Ctrl + Home</strong> を押すと確実に先頭へ移動できます。</li>
+        <li>下の枠の中身を<strong>すべてコピーして貼り付け</strong>、最後に <strong>Enter を1回</strong>押して、Google タグマネージャーのコードが次の行から始まるようにします。
           <div class="copybox">&lt;link rel="preload" as="image"
   href="https://81drive.com/wp-content/uploads/2026/09/Hopping-Daikoku-PA%E2%91%A0.jpg"
   imagesrcset="https://81drive.com/wp-content/uploads/2026/09/Hopping-Daikoku-PA%E2%91%A0-768x432.jpg 768w, https://81drive.com/wp-content/uploads/2026/09/Hopping-Daikoku-PA%E2%91%A0-1024x576.jpg 1024w, https://81drive.com/wp-content/uploads/2026/09/Hopping-Daikoku-PA%E2%91%A0.jpg 1280w"
   imagesizes="(max-width: 1280px) 100vw, 1280px"
-  fetchpriority="high"&gt;</div></li>
-        <li>ページの<strong>一番下にある「変更を保存」</strong>ボタンをクリックします。
-          <span class="ok">「設定を保存しました」と表示されれば A は完了です</span></li>
+  fetchpriority="high"&gt;</div>
+          <span class="ok">貼り付け後、欄の中は「preload のコード」→「Google タグマネージャーのコード」の順に並びます</span></li>
+        <li>左パネルを<strong>一番上までスクロール</strong>し、青い <strong>「公開」</strong>ボタンをクリックします。
+          <span class="ok">ボタンが「公開済み」に変われば A は完了です</span></li>
       </ol>
     </div>
   </div>
