@@ -101,6 +101,18 @@ jobs:
             echo "  fetchpriority: NOT FOUND anywhere in the HTML"
           fi
 
+          echo "--- is the LCP image itself cached at the edge? ---"
+          # Every run's first Lighthouse pass is the slow one. If the image is a
+          # MISS on first fetch and a HIT afterwards, that outlier is the edge
+          # fetching it from the origin, not the page being slow.
+          IMG="https://81drive.com/wp-content/uploads/2026/09/Hopping-Daikoku-PA%E2%91%A0.jpg"
+          for i in 1 2 3; do
+            printf '  fetch %d: ' "$i"
+            curl -sSI --max-time 30 "$IMG" 2>/dev/null \
+              | grep -iE '^(cf-cache-status|age|cf-ray|content-length)' \
+              | tr -d '\r' | paste -sd' ' -
+          done
+
           echo "--- which banner does the HTML reference? ---"
           curl -sS --max-time 30 "$TARGET_URL" 2>/dev/null \
             | grep -oE '/wp-content/uploads/[0-9]{4}/[0-9]{2}/[^"?]+\.(png|jpe?g|webp)' \
