@@ -1,4 +1,4 @@
-<title>+81DRIVE 表示速度診断</title>
+<title>+81DRIVE 作業手順</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Saira+Condensed:wght@500;600;700&display=swap">
@@ -293,194 +293,102 @@ ol.micro strong{color:var(--ink)}
 .stuck h3{font-size:15px;font-weight:700;margin-bottom:10px}
 @media (max-width:560px){.phase-head{grid-template-columns:auto 1fr;row-gap:6px}.mins{grid-column:2}}
 </style>
-
 <div class="wrap">
 
 <header class="mast">
   <div class="kicker">作業手順 · クリック単位の詳細版</div>
   <h1>+81DRIVE 作業手順</h1>
-  <p class="sub">残っている作業を<strong>1クリックずつ</strong>に分解しました。上から順にそのとおり進めれば終わります。全部で<strong>約35分</strong>です。</p>
+  <p class="sub">デスクトップは<strong>目標達成</strong>しました。残るのは<strong>モバイルを1秒台に入れる</strong>ことだけです。残作業を1クリックずつに分解しました。</p>
   <div class="provenance">
-    <span>根拠 <b>09-17 02:59 の実測</b></span>
-    <span>現在 <b>モバイル LCP 3.61s ／ デスクトップ 1.00s</b></span>
+    <span>根拠 <b>09-18 03:06 の実測(米国東海岸)</b></span>
+    <span>デスクトップ <b>100点 / LCP 0.65s</b></span>
+    <span>モバイル <b>92点 / LCP 2.89s</b></span>
   </div>
 </header>
 
 <section>
   <div class="sec-head">
     <span class="sec-num">00</span>
-    <h2>全体の流れ</h2>
-    <span class="note">合計 約35分</span>
+    <h2>今どこにいるか</h2>
   </div>
-  <div class="phases">
-    <div class="ph"><div class="k">A</div><div class="t">preloadを貼る</div><div class="m">5分 · 貼るだけ</div></div>
-    <div class="ph"><div class="k">B</div><div class="t">キャッシュ削除</div><div class="m">2分</div></div>
-    <div class="ph"><div class="k">C</div><div class="t">入ったか確認</div><div class="m">1分</div></div>
-    <div class="ph"><div class="k">D</div><div class="t">画像を差し替え</div><div class="m">20分</div></div>
-    <div class="ph"><div class="k">B'</div><div class="t">もう一度キャッシュ削除</div><div class="m">2分</div></div>
-    <div class="ph wait"><div class="k">E</div><div class="t">計測を依頼</div><div class="m">5分待つ</div></div>
+  <div class="verdict">
+    <div class="vcard ok">
+      <div class="lab">Desktop — 完了</div>
+      <div class="big">0.65<span style="font-size:20px">s</span></div>
+      <div class="cap">スコア100点。3回とも0.6秒台で安定。<strong>「1秒を切る」という当初の最終目標を達成しています。</strong>ここはもう触りません。</div>
+    </div>
+    <div class="vcard crit">
+      <div class="lab">Mobile — 残作業</div>
+      <div class="big">2.89<span style="font-size:20px">s</span></div>
+      <div class="cap">スコア92点。ここまで来ましたが、<strong>目標の「1秒台」にはあと約1秒</strong>足りません。以下の作業はすべてモバイルのためのものです。</div>
+    </div>
   </div>
-  <p style="margin-top:14px;font-size:13.5px"><strong>A から順にやってください。</strong>A は貼るだけで5分、失敗しようがない作業です。D は少し手間なので、A・B・C まで終わったところで一度休んでも構いません。</p>
 </section>
 
 <section>
   <div class="sec-head">
     <span class="sec-num">01</span>
-    <h2>なぜ B（キャッシュ削除）が毎回必要か</h2>
+    <h2>全体の流れ</h2>
+    <span class="note">合計 約40分 + 待ち時間</span>
   </div>
-  <figure>
-    <svg viewBox="0 0 660 250" role="img" aria-label="Purge を実行しない場合、WordPress の変更は Cloudflare の古いコピーに阻まれて訪問者に届かない。Purge を実行すると届く。">
-      <defs>
-        <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-          <polygon points="0,0 10,5 0,10" fill="currentColor"/>
-        </marker>
-        <marker id="ahr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-          <polygon points="0,0 10,5 0,10" fill="var(--accent)"/>
-        </marker>
-        <marker id="ahg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-          <polygon points="0,0 10,5 0,10" fill="var(--good)"/>
-        </marker>
-      </defs>
+  <div class="phases">
+    <div class="ph"><div class="k">A</div><div class="t">Tiered Cache を入れる</div><div class="m">5分 · 設定だけ</div></div>
+    <div class="ph wait"><div class="k">→</div><div class="t">計測を依頼</div><div class="m">1時間空ける</div></div>
+    <div class="ph"><div class="k">B</div><div class="t">スライダーを止める</div><div class="m">5分 · 検証</div></div>
+    <div class="ph wait"><div class="k">→</div><div class="t">計測を依頼</div><div class="m">1時間空ける</div></div>
+    <div class="ph"><div class="k">C</div><div class="t">GTMを外す</div><div class="m">30分 · 要確認</div></div>
+    <div class="ph wait"><div class="k">→</div><div class="t">計測を依頼</div><div class="m">1時間空ける</div></div>
+  </div>
 
-      <text x="10" y="20" font-size="12" font-weight="700" fill="var(--accent)">Purge しないと…</text>
-      <rect x="10" y="32" width="100" height="42" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
-      <text x="60" y="58" font-size="12" text-anchor="middle" fill="currentColor">あなたが編集</text>
-      <line x1="112" y1="53" x2="162" y2="53" stroke="currentColor" stroke-width="1.5" marker-end="url(#ah)"/>
-      <rect x="170" y="32" width="110" height="42" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
-      <text x="225" y="52" font-size="12" text-anchor="middle" fill="currentColor">WordPress</text>
-      <text x="225" y="67" font-size="11" text-anchor="middle" fill="var(--good)">新しい ✓</text>
-      <line x1="282" y1="53" x2="342" y2="53" stroke="currentColor" stroke-width="1.5" marker-end="url(#ah)"/>
-      <rect x="350" y="32" width="130" height="42" rx="3" fill="none" stroke="var(--accent)" stroke-width="2"/>
-      <text x="415" y="52" font-size="12" text-anchor="middle" fill="currentColor">Cloudflare</text>
-      <text x="415" y="67" font-size="11" text-anchor="middle" fill="var(--accent)">古いコピーが残る</text>
-      <line x1="482" y1="53" x2="537" y2="53" stroke="var(--accent)" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#ahr)"/>
-      <text x="510" y="26" font-size="10.5" text-anchor="middle" fill="var(--accent)">最大1日</text>
-      <rect x="545" y="32" width="105" height="42" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
-      <text x="597" y="52" font-size="12" text-anchor="middle" fill="currentColor">訪問者・計測</text>
-      <text x="597" y="67" font-size="11" text-anchor="middle" fill="var(--accent)">古いまま ✗</text>
-
-      <line x1="10" y1="110" x2="650" y2="110" stroke="currentColor" stroke-width="1" opacity="0.2"/>
-
-      <text x="10" y="148" font-size="12" font-weight="700" fill="var(--good)">Purge すれば…</text>
-      <rect x="10" y="160" width="100" height="42" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
-      <text x="60" y="186" font-size="12" text-anchor="middle" fill="currentColor">あなたが編集</text>
-      <line x1="112" y1="181" x2="162" y2="181" stroke="currentColor" stroke-width="1.5" marker-end="url(#ah)"/>
-      <rect x="170" y="160" width="110" height="42" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
-      <text x="225" y="180" font-size="12" text-anchor="middle" fill="currentColor">WordPress</text>
-      <text x="225" y="195" font-size="11" text-anchor="middle" fill="var(--good)">新しい ✓</text>
-      <line x1="282" y1="181" x2="342" y2="181" stroke="var(--good)" stroke-width="2" marker-end="url(#ahg)"/>
-      <text x="312" y="174" font-size="10.5" text-anchor="middle" fill="var(--good)" font-weight="700">Purge</text>
-      <rect x="350" y="160" width="130" height="42" rx="3" fill="none" stroke="var(--good)" stroke-width="2"/>
-      <text x="415" y="180" font-size="12" text-anchor="middle" fill="currentColor">Cloudflare</text>
-      <text x="415" y="195" font-size="11" text-anchor="middle" fill="var(--good)">取り直す</text>
-      <line x1="482" y1="181" x2="537" y2="181" stroke="var(--good)" stroke-width="2" marker-end="url(#ahg)"/>
-      <rect x="545" y="160" width="105" height="42" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
-      <text x="597" y="180" font-size="12" text-anchor="middle" fill="currentColor">訪問者・計測</text>
-      <text x="597" y="195" font-size="11" text-anchor="middle" fill="var(--good)">新しい ✓</text>
-    </svg>
-    <figcaption>WordPress で保存しても、Cloudflare に残った古いコピーが訪問者に届き続けます。Purge Everything がその古いコピーを消す唯一の操作です。</figcaption>
-  </figure>  <p style="margin-top:14px">直近の計測でも、配信されていたのは<strong>12時間前のコピー</strong>でした。<strong>変更したら必ず B をやる</strong>とだけ覚えてください。</p>
+  <div class="rule-box">
+    <div class="lab">この順番には理由があります</div>
+    <ol>
+      <li><strong>1回に1つだけ変える。</strong>2つ同時に変えると、数字が動いたときどちらが効いたのか分かりません。効かなかった変更を元に戻すこともできなくなります。</li>
+      <li><strong>変更したら1時間空けてから計測する。</strong>更新直後はCloudflareのキャッシュが全米で作り直されるため、<strong>実際より2〜3倍遅い数字</strong>が出ます。09-17 15:16 の計測がまさにこれで、スコアが92から56に落ちたように見えました。実際には何も悪くなっていませんでした。</li>
+      <li><strong>A → B → C の順に、効果が確実な順で並べています。</strong>A は効果が読めて副作用がありません。B は検証(効くかどうか試す)です。C は一番効きますが一番慎重さが要ります。</li>
+    </ol>
+  </div>
 </section>
 
 <section>
   <div class="sec-head">
     <span class="sec-num">02</span>
-    <h2>手順</h2>
+    <h2>手順A — Cloudflare の Tiered Cache を有効にする</h2>
+    <span class="note">5分 · 設定を1つ変えるだけ</span>
   </div>
 
-  <div class="phase">
-    <div class="phase-head"><span class="pk">A</span><h3>preload タグを貼る</h3><span class="mins">5分</span></div>
-    <div class="phase-body">
-      <ol class="micro">
-        <li>ブラウザで <strong>https://81drive.com/wp-admin/</strong> を開き、WordPress にログインします。</li>
-        <li>左メニューの <strong>「外観」</strong>にマウスを合わせ、<strong>「カスタマイズ」</strong>をクリックします。
-          <span class="nope">「SWELL設定」ではありません。こちらは <strong>外観 → カスタマイズ</strong> です</span></li>
-        <li>左側に設定項目が並びます。一番下のほうにある <strong>「高度な設定」</strong>をクリックします。
-          <span class="ok">「headタグ終了直前に出力するコード」という見出しの入力欄が出てきます</span></li>
-        <li><strong>念のためバックアップを取ります。</strong>その入力欄の中をクリックし、<strong>Ctrl + A</strong>（Mac: <strong>⌘ + A</strong>）で全選択 →<strong>Ctrl + C</strong> でコピーし、メモ帳などに貼って保存しておきます。
-          <span class="nope">この欄には Google タグマネージャーのコードが入っています。消すとアクセス解析が止まります</span></li>
-        <li>入力欄の<strong>いちばん先頭</strong>（<code>&lt;!-- Google Tag Manager --&gt;</code> の左側）にカーソルを置きます。<strong>Ctrl + Home</strong> を押すと確実に先頭へ移動できます。</li>
-        <li>下の枠の中身を<strong>すべてコピーして貼り付け</strong>、最後に <strong>Enter を1回</strong>押して、Google タグマネージャーのコードが次の行から始まるようにします。
-          <div class="copybox">&lt;link rel="preload" as="image"
-  href="https://81drive.com/wp-content/uploads/2026/09/Hopping-Daikoku-PA%E2%91%A0.jpg"
-  imagesrcset="https://81drive.com/wp-content/uploads/2026/09/Hopping-Daikoku-PA%E2%91%A0-768x432.jpg 768w, https://81drive.com/wp-content/uploads/2026/09/Hopping-Daikoku-PA%E2%91%A0-1024x576.jpg 1024w, https://81drive.com/wp-content/uploads/2026/09/Hopping-Daikoku-PA%E2%91%A0.jpg 1280w"
-  imagesizes="(max-width: 1280px) 100vw, 1280px"
-  fetchpriority="high"&gt;</div>
-          <span class="ok">貼り付け後、欄の中は「preload のコード」→「Google タグマネージャーのコード」の順に並びます</span></li>
-        <li>左パネルを<strong>一番上までスクロール</strong>し、青い <strong>「公開」</strong>ボタンをクリックします。
-          <span class="ok">ボタンが「公開済み」に変われば A は完了です</span></li>
-      </ol>
+  <div class="step">
+    <div class="step-head">
+      <span class="step-no">A</span>
+      <h3>拠点をまたいでキャッシュを共有させる</h3>
+      <div class="step-meta">
+        <span class="chip gain">1回目の6.03秒を潰す</span>
+        <span class="chip easy">副作用なし</span>
+      </div>
     </div>
-  </div>
+    <div class="step-body">
+      <div class="why">
+        <b>なぜこれをやるのか。</b>今のモバイルの3回の計測は <b>6.03s / 2.72s / 2.89s</b> です。1回目だけ突出して遅い。これは Cloudflare が<b>拠点ごとに別々のキャッシュを持っている</b>ためで、その都市で最初のアクセスだけ日本のサーバーまで取りに行っています。実ユーザーで言えば「その街で最初の1人」がこれに当たります。Tiered Cache は拠点同士でキャッシュを融通させる仕組みで、これを入れると初めての拠点でも近くの拠点から受け取れます。
+      </div>
 
-  <div class="phase">
-    <div class="phase-head"><span class="pk">B</span><h3>Cloudflare のキャッシュを削除する</h3><span class="mins">2分</span></div>
-    <div class="phase-body">
-      <ol class="micro">
-        <li>新しいタブで <strong>https://dash.cloudflare.com</strong> を開き、ログインします。</li>
-        <li>サイトの一覧から <strong>81drive.com</strong> をクリックします。</li>
-        <li>左側のメニューから <strong>「Caching」</strong>をクリックします。</li>
-        <li>その下に開いたメニューの <strong>「Configuration」</strong>をクリックします。</li>
-        <li>ページの上のほうにある <strong>「Purge Everything」</strong>ボタンをクリックします。
-          <span class="nope">隣に「Custom Purge」もありますが、そちらではありません</span></li>
-        <li>確認の小窓が出るので、その中の <strong>「Purge Everything」</strong>をもう一度クリックします。
-          <span class="ok">「Success」などの表示が出れば完了です</span></li>
-        <li><strong>2分ほど待ちます。</strong>すぐ確認すると反映前のことがあります。</li>
+      <ol class="howto">
+        <li><strong>Cloudflare にログイン</strong>します。<span class="path">https://dash.cloudflare.com</span></li>
+        <li>サイト一覧から <strong>81drive.com</strong> をクリックします。</li>
+        <li>左のメニューから <span class="path">Caching</span> をクリックし、その下に出てくる <span class="path">Tiered Cache</span> をクリックします。</li>
+        <li><strong>「Tiered Cache Topology」</strong>という項目を探します。</li>
+        <li><strong>「Generic Global Tiered Topology」</strong>を選びます。選択したら自動で保存されます(保存ボタンがある場合は押してください)。</li>
+        <li>同じ画面に <strong>「Argo Tiered Cache」</strong>という項目もあります。<strong>これは有料なので触らないでください。</strong></li>
       </ol>
-    </div>
-  </div>
 
-  <div class="phase">
-    <div class="phase-head"><span class="pk">C</span><h3>ちゃんと入ったか自分で確認する</h3><span class="mins">1分</span></div>
-    <div class="phase-body">
-      <ol class="micro">
-        <li>Chrome で<strong>シークレットウィンドウ</strong>を開きます。<br>Windows: <strong>Ctrl + Shift + N</strong> ／ Mac: <strong>⌘ + Shift + N</strong></li>
-        <li>そのウィンドウで <strong>https://81drive.com/</strong> を開きます。</li>
-        <li>ページの何もないところで<strong>右クリック</strong>し、<strong>「ページのソースを表示」</strong>を選びます。</li>
-        <li>英数字が並んだ画面が出ます。<strong>Ctrl + F</strong>（Mac: <strong>⌘ + F</strong>）を押して、検索欄に <strong>preload</strong> と入力します。
-          <span class="ok">ヒット件数が 1件以上になれば成功です。A は正しく反映されています</span>
-          <span class="nope">0件なら、B をもう一度実行して5分待ってから、この C をやり直してください</span></li>
-      </ol>
-    </div>
-  </div>
+      <div class="warn">
+        <div class="lab">選べなかった場合</div>
+        項目がグレーアウトしていたり、「Upgrade」「Pro プランが必要」と出た場合は、<strong>その時点でやめて、画面のスクリーンショットを送ってください。</strong>無理に有料プランに入る必要はありません。その場合は手順Bに進みます。
+      </div>
 
-  <div class="phase">
-    <div class="phase-head"><span class="pk">D</span><h3>重すぎる画像を差し替える</h3><span class="mins">20分</span></div>
-    <div class="phase-body">
-      <p style="font-size:13.5px;margin-bottom:16px"><code>名称未設定のデザイン.png</code> が <strong>246KB</strong>あります。実際は横150pxほどで表示されているのに、1024pxで配信されている状態です。</p>
-      <ol class="micro">
-        <li>WordPress管理画面に戻り、左メニューの <strong>「メディア」→「ライブラリ」</strong>をクリックします。</li>
-        <li>右上の検索欄に <strong>名称未設定</strong> と入力します。</li>
-        <li>出てきた画像を<strong>クリック</strong>します。詳細画面が開きます。</li>
-        <li>右下にある <strong>「ファイルをダウンロード」</strong>をクリックし、デスクトップなど分かる場所に保存します。</li>
-        <li>新しいタブで <strong>https://squoosh.app</strong> を開きます。（Google が提供する無料ツールで、画像はパソコンの外に出ません）</li>
-        <li>いま保存した画像を、Squoosh の画面に<strong>ドラッグ＆ドロップ</strong>します。画面が左右に分かれます。</li>
-        <li><strong>右側のパネル</strong>の中にある <strong>「Resize」</strong>のチェックボックスをオンにします。</li>
-        <li>すぐ下に出る <strong>「Width」</strong>欄に <strong>300</strong> と入力します。（Height は自動で変わります）</li>
-        <li>右側パネル下部の <strong>「Compress」</strong>のプルダウンで <strong>WebP</strong> を選びます。
-          <span class="nope">文字がたくさん入った画像なら、WebP ではなく <strong>OxiPNG</strong> を選ぶと文字がくっきり残ります</span></li>
-        <li>画面の<strong>左下と右下の数字</strong>を見比べます。<strong>246 kB → 20 kB 前後</strong>になっていればOKです。中央の縦線を左右にドラッグして、見た目が変わっていないことも確認してください。</li>
-        <li>右下の<strong>丸い「↓」ボタン</strong>をクリックしてダウンロードします。</li>
-        <li>WordPress に戻り、<strong>「メディア」→「新規追加」</strong>をクリックします。</li>
-        <li>いまダウンロードしたファイルを<strong>ドラッグ＆ドロップ</strong>してアップロードします。</li>
-        <li>左メニューの <strong>「固定ページ」</strong>をクリックし、トップページ（ホーム）の <strong>「編集」</strong>を開きます。</li>
-        <li>差し替えたい画像の場所まで<strong>スクロール</strong>し、その画像を<strong>クリック</strong>して選択します。</li>
-        <li>画像の上に出るツールバーの <strong>「置換」</strong>をクリックし、<strong>「メディアライブラリを開く」</strong>を選びます。</li>
-        <li>さきほどアップロードした画像を選び、<strong>「選択」</strong>をクリックします。</li>
-        <li>画面右上の <strong>「更新」</strong>ボタンをクリックします。
-          <span class="ok">「固定ページを更新しました」と出れば D は完了です</span></li>
-        <li><strong>B（キャッシュ削除）をもう一度実行します。</strong>これを忘れると反映されません。</li>
-      </ol>
-    </div>
-  </div>
-
-  <div class="phase">
-    <div class="phase-head"><span class="pk">E</span><h3>計測する</h3><span class="mins">5分</span></div>
-    <div class="phase-body">
-      <ol class="micro">
-        <li>私に <strong>「計測して」</strong>と送ってください。それだけで実行して結果を読み解きます。</li>
-        <li>ご自分で実行したい場合は、<strong>github.com/jdmpride1-debug/81drive</strong> → 上部タブ <strong>「Actions」</strong> → 左の <strong>「Performance audit (US)」</strong> → 右の <strong>「Run workflow」</strong> → 緑の <strong>「Run workflow」</strong>。</li>
-      </ol>
+      <div class="check">
+        <div class="lab">終わったら</div>
+        Purge は不要です。<strong>1時間ほど空けてから</strong>「計測して」とお声がけください。1回目の数値が6秒台から下がっていれば成功です。
+      </div>
     </div>
   </div>
 </section>
@@ -488,37 +396,153 @@ ol.micro strong{color:var(--ink)}
 <section>
   <div class="sec-head">
     <span class="sec-num">03</span>
-    <h2>詰まったら</h2>
+    <h2>手順B — スライダーの自動切り替えを止める(検証)</h2>
+    <span class="note">5分 · 効くかどうか試す作業</span>
   </div>
-  <div class="stuck">
-    <h3>その画面のスクリーンショットを送ってください</h3>
-    <p style="margin-bottom:10px">「どのボタンか分からない」「書いてある項目が見当たらない」というときは、<strong>迷わず画面を撮って送ってください。</strong>どこを押せばいいか指します。</p>
-    <p style="margin-bottom:0;font-size:13.5px">特に <strong>A-4（&lt;head&gt;内に出力するコードの欄）</strong> と <strong>D-16（置換ボタン）</strong> は、テーマのバージョンによって場所や名前が違うことがあります。無理に探さず聞いてください。</p>
+
+  <div class="step">
+    <div class="step-head">
+      <span class="step-no">B</span>
+      <h3>メインビジュアルが動いているなら止めてみる</h3>
+      <div class="step-meta">
+        <span class="chip gain">効けば最大1秒</span>
+        <span class="chip easy">元に戻せる</span>
+      </div>
+    </div>
+    <div class="step-body">
+      <div class="why">
+        <b>これは「たぶん効く」ではなく「試して確かめる」作業です。</b>LCP は「画面に一番大きく表示された要素が出た時刻」で決まります。メインビジュアルが自動で切り替わる設定だと、計測中に次のスライドへ移った瞬間、<b>その新しい画像がLCPとして記録し直されます</b>。切り替わる前に終われば速く、切り替わってしまえば遅くなる。モバイルの数値が計測ごとに大きく振れているのは、これで説明がつきます。<b>ただし確証はありません。</b>止めて数字が揃えば原因確定、揃わなければ私の推測が外れです。
+      </div>
+
+      <ol class="howto">
+        <li>WordPress管理画面にログインします。</li>
+        <li>左メニューの <span class="path">外観</span> → <span class="path">カスタマイズ</span> をクリックします。</li>
+        <li>メニューの中から <span class="path">トップページ</span> をクリックし、続けて <span class="path">メインビジュアル</span> をクリックします。</li>
+        <li><strong>「スライド切り替えの間隔(秒)」</strong>または<strong>「自動再生」</strong>という項目を探します。</li>
+        <li>間隔の設定なら <strong>0</strong> に、自動再生のオンオフなら <strong>オフ</strong> にします。</li>
+        <li>画面右上の <strong>「公開」</strong>ボタンを押します。<span style="color:var(--muted)">※ページ下部の「変更を保存」ではありません</span></li>
+        <li>Cloudflare → <span class="path">Caching</span> → <span class="path">Configuration</span> → <strong>Purge Everything</strong> を実行します。</li>
+      </ol>
+
+      <div class="warn">
+        <div class="lab">項目が見つからない場合</div>
+        SWELLのバージョンによって項目名が違います。<strong>メインビジュアルの設定画面をスクリーンショットで送ってください。</strong>どれを触ればいいか指定します。<br>
+        どうしても見つからなければ、<strong>スライドを1枚だけ残して他を削除</strong>しても同じ検証ができます(あとで戻せます)。
+      </div>
+
+      <div class="check">
+        <div class="lab">判定のしかた</div>
+        1時間空けて計測します。<strong>3回の数値が 2.9秒前後に揃えば、原因はスライダーで確定です。</strong>その場合、スライダーを見た目として残したいなら「2枚目以降だけ遅れて読み込む」という別の対処を考えます。<br>
+        揃わなければ私の推測が外れなので、<strong>設定は元に戻して構いません。</strong>その時はLighthouseの詳細レポートを開いて、LCPになっている要素そのものを特定します。
+      </div>
+    </div>
   </div>
 </section>
 
 <section>
   <div class="sec-head">
     <span class="sec-num">04</span>
-    <h2>終わったらこうなる見込み</h2>
+    <h2>手順C — Google Tag Manager を外す</h2>
+    <span class="note">30分 · 一番効くが一番慎重に</span>
+  </div>
+
+  <div class="step">
+    <div class="step-head">
+      <span class="step-no">C</span>
+      <h3>115KB のJavaScriptを削る</h3>
+      <div class="step-meta">
+        <span class="chip gain">JS 523KB → 約400KB</span>
+        <span class="chip easy">要事前確認</span>
+      </div>
+    </div>
+    <div class="step-body">
+      <div class="why">
+        <b>モバイルを1秒台に入れるには、これしか残っていません。</b>画像は3回の削減でやり切りました(モバイルの画像は合計135KB)。今モバイルの足を引っ張っているのは <b>JavaScript 523KB</b> で、そのうち <b>115KB が GTM</b> です。そしてGTMは計測上、<b>タグを1つも発火させていません</b>。何も仕事をしていない115KBです。
+      </div>
+
+      <div class="warn">
+        <div class="lab">必ず先に中身を確認してください</div>
+        「何も発火していない」は私の計測からの判断です。<strong>タグが設定されているのに条件が合わず発火していないだけ</strong>という可能性があります。消す前に必ず手順1〜3で中身を見てください。<strong>広告のコンバージョン計測が入っていた場合、消すと計測が止まります。</strong>
+      </div>
+
+      <ol class="howto">
+        <li><span class="path">https://tagmanager.google.com</span> にアクセスし、<strong>GTM-WFGD8X5Q</strong> のコンテナを開きます。</li>
+        <li>左メニューの <strong>「タグ」</strong>をクリックします。</li>
+        <li><strong>ここに何が並んでいるかをスクリーンショットで送ってください。</strong>ここで判断が分かれます。
+          <ul style="margin-top:8px">
+            <li><strong>1つもない、または使っていないものだけ</strong> → 手順4へ進んで外します</li>
+            <li><strong>Meta Pixel や広告のコンバージョンタグがある</strong> → <strong>外さないでください。</strong>別の手を考えます</li>
+          </ul>
+        </li>
+        <li><span class="path">外観</span> → <span class="path">カスタマイズ</span> → <span class="path">高度な設定</span> → <strong>「headタグ終了直前に出力するコード」</strong>を開きます。</li>
+        <li><strong>中身を全部コピーして、メモ帳などに保存してください。</strong>これが元に戻すための唯一の手段です。必ずやってください。</li>
+        <li>その中から <strong>GTM のコードだけ</strong>を削除します。<code>&lt;!-- Google Tag Manager --&gt;</code> から <code>&lt;!-- End Google Tag Manager --&gt;</code> までが対象です。<strong>先頭に貼った preload の行(<code>rel="preload"</code> で始まる行)は残してください。</strong></li>
+        <li>右上の <strong>「公開」</strong>を押します。</li>
+        <li>Cloudflare で <strong>Purge Everything</strong> を実行します。</li>
+      </ol>
+
+      <div class="check">
+        <div class="lab">外したあと必ず確認すること</div>
+        <strong>GA4(アクセス解析)が止まっていないか</strong>を確認してください。GA4 は Site Kit 経由でも入っているので残るはずですが、確認は必要です。<br>
+        Google Analytics → <strong>レポート</strong> → <strong>リアルタイム</strong> を開いた状態で、別のブラウザから 81drive.com にアクセスし、<strong>人数が1増えれば正常</strong>です。<br>
+        増えなければ、手順5で保存したコードを貼り戻して「公開」してください。元通りになります。
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="sec-num">05</span>
+    <h2>ここまでの成果</h2>
   </div>
   <div class="tablewrap">
-  <table class="goal">
-    <thead><tr><th>段階</th><th class="n">モバイル LCP</th><th class="n">モバイル容量</th><th>状態</th></tr></thead>
-    <tbody>
-      <tr><td>着手前（09-11）</td><td class="n">2.42s</td><td class="n">1,249KB</td><td>—</td></tr>
-      <tr><td><strong>現在</strong></td><td class="n" style="color:var(--accent);font-weight:700">3.61s</td><td class="n">877KB</td><td>A・D とも未実施</td></tr>
-      <tr><td><strong>A の後</strong></td><td class="n" style="color:var(--good);font-weight:700">約 2.2〜2.6s</td><td class="n">877KB</td><td>ばらつきが消える</td></tr>
-      <tr><td><strong>A＋D の後</strong></td><td class="n" style="color:var(--good);font-weight:700">約 1.5〜2.2s</td><td class="n">約 700KB</td><td><strong>1秒台が見えてくる</strong></td></tr>
-    </tbody>
-  </table>
+    <table class="goal">
+      <thead>
+        <tr><th>項目</th><th class="n">着手前</th><th class="n">現在</th><th>状態</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>サーバー応答(TTFB)</td><td class="n">0.85s</td><td class="n">0.03s</td><td class="p2">28倍速 · 完了</td></tr>
+        <tr><td>デスクトップ LCP</td><td class="n">0.79s</td><td class="n">0.65s</td><td class="p2">100点 · 完了</td></tr>
+        <tr><td>デスクトップ 総容量</td><td class="n">2,282KB</td><td class="n">997KB</td><td class="p2">−56% · 完了</td></tr>
+        <tr><td>モバイル 総容量</td><td class="n">1,249KB</td><td class="n">753KB</td><td class="p2">−40% · 完了</td></tr>
+        <tr><td>モバイル 画像</td><td class="n">—</td><td class="n">135KB</td><td class="p2">やり切り</td></tr>
+        <tr><td>モバイル LCP</td><td class="n">2.42s</td><td class="n">2.89s</td><td class="now">残作業 → 1秒台へ</td></tr>
+        <tr><td>モバイル JavaScript</td><td class="n">—</td><td class="n">523KB</td><td class="now">手順C で削減</td></tr>
+      </tbody>
+    </table>
   </div>
-  <p style="margin-top:18px"><strong>サーバー側（TTFB 0.04秒）とデスクトップ（LCP 1.00秒）はすでに目標を達成しています。</strong>残りはこの2つだけです。</p>
+  <p style="margin-top:14px;font-size:13.5px">モバイルのLCPが着手前より数字が大きいのは、<strong>この間にサイトの内容自体が増えた</strong>ためです(画像点数が増え、新しいバナーが追加されています)。同じページを比較しているわけではない点はご承知おきください。容量が4割減っているのが、実際の改善量です。</p>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="sec-num">06</span>
+    <h2>用語</h2>
+  </div>
+  <div class="glossary">
+    <div class="gl"><dl>
+      <dt>LCP</dt>
+      <dd>画面に<strong>一番大きく表示された要素</strong>が出るまでの時間。このサイトではメインビジュアルの画像です。Googleの「良い」基準は2.5秒以内。</dd>
+    </dl></div>
+    <div class="gl"><dl>
+      <dt>TTFB</dt>
+      <dd>アクセスしてから<strong>サーバーが最初の返事をする</strong>までの時間。0.03秒は事実上ゼロです。ここは完全に解決済み。</dd>
+    </dl></div>
+    <div class="gl"><dl>
+      <dt>Purge</dt>
+      <dd>Cloudflareが保存している<strong>古いコピーを全部捨てる</strong>操作。これをしないと、変更してもしばらく古いページが配られ続けます。</dd>
+    </dl></div>
+    <div class="gl"><dl>
+      <dt>拠点(エッジ)</dt>
+      <dd>Cloudflareが世界中に置いているサーバー。<strong>拠点ごとに別のキャッシュ</strong>を持つため、その拠点で初めてのアクセスは遅くなります。手順Aはこれへの対処です。</dd>
+    </dl></div>
+  </div>
 </section>
 
 <footer>
-  <p>+81DRIVE（JDM PRIDE株式会社）／ WordPress + SWELL 2.12.0 ／ Cloudflare ／ EWWW Image Optimizer<br>
-  根拠となる計測：2026-09-17 02:59 · Lighthouse 12 · 米国リージョン · 各3回の中央値</p>
+  <p>計測環境:GitHub Actions 米国リージョン / Lighthouse 12 / 各フォームファクタ3回実行の中央値。最新の計測は 2026-09-18 03:06 UTC、ランナー所在は米国東海岸(EWR/ATL)。</p>
+  <p>数値はすべて実測です。推測にもとづく箇所はその旨を本文に明記しています。</p>
 </footer>
 
 </div>
